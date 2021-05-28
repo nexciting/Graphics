@@ -10,8 +10,8 @@ namespace UnityEngine.Rendering.Universal.Internal
     //NOTE: This class is meant to be removed when RTHandles get implemented in urp
     internal sealed class RenderTargetBufferSystem
     {
-        RenderTargetHandle RTA;
-        RenderTargetHandle RTB;
+        RTHandle RTA;
+        RTHandle RTB;
         bool m_FirstIsBackBuffer = true;
         RenderTextureDescriptor m_Desc;
         FilterMode m_FilterMode;
@@ -23,25 +23,33 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         public RenderTargetBufferSystem(string name)
         {
-            m_NameA = Shader.PropertyToID(name + "A");
-            m_NameB = Shader.PropertyToID(name + "B");
-            RTA.Init(name + "A");
-            RTB.Init(name + "B");
+            string nameA = name + "A";
+            string nameB = name + "B";
+            m_NameA = Shader.PropertyToID(nameA);
+            m_NameB = Shader.PropertyToID(nameB);
+            RTA = RTHandles.Alloc(new RenderTargetIdentifier(m_NameA, 0, CubemapFace.Unknown, -1), nameA);
+            RTB = RTHandles.Alloc(new RenderTargetIdentifier(m_NameB, 0, CubemapFace.Unknown, -1), nameB);
         }
 
-        public RenderTargetHandle GetBackBuffer()
+        public void Dispose()
+        {
+            RTA?.Release();
+            RTB?.Release();
+        }
+
+        public RTHandle GetBackBuffer()
         {
             return m_FirstIsBackBuffer ? RTA : RTB;
         }
 
-        public RenderTargetHandle GetBackBuffer(CommandBuffer cmd)
+        public RTHandle GetBackBuffer(CommandBuffer cmd)
         {
             if (!m_RTisAllocated)
                 Initialize(cmd);
             return m_FirstIsBackBuffer ? RTA : RTB;
         }
 
-        public RenderTargetHandle GetFrontBuffer(CommandBuffer cmd)
+        public RTHandle GetFrontBuffer(CommandBuffer cmd)
         {
             if (!m_RTisAllocated)
                 Initialize(cmd);
@@ -78,7 +86,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             Initialize(cmd);
         }
 
-        public RenderTargetHandle GetBufferA()
+        public RTHandle GetBufferA()
         {
             return RTA;
         }

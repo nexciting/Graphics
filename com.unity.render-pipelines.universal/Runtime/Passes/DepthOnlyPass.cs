@@ -36,11 +36,31 @@ namespace UnityEngine.Rendering.Universal.Internal
         /// <summary>
         /// Configure the pass
         /// </summary>
+        [Obsolete]
         public void Setup(
             RenderTextureDescriptor baseDescriptor,
             RenderTargetHandle depthAttachmentHandle)
         {
             this.depthAttachmentHandle = depthAttachmentHandle;
+            baseDescriptor.colorFormat = RenderTextureFormat.Depth;
+            baseDescriptor.depthBufferBits = k_DepthBufferBits;
+
+            // Depth-Only pass don't use MSAA
+            baseDescriptor.msaaSamples = 1;
+            descriptor = baseDescriptor;
+
+            this.allocateDepth = true;
+            this.shaderTagId = k_ShaderTagId;
+        }
+
+        /// <summary>
+        /// Configure the pass
+        /// </summary>
+        public void Setup(
+            RenderTextureDescriptor baseDescriptor,
+            RTHandle depthAttachmentHandle)
+        {
+            this.depthAttachmentHandle = new RenderTargetHandle(depthAttachmentHandle);
             baseDescriptor.colorFormat = RenderTextureFormat.Depth;
             baseDescriptor.depthBufferBits = k_DepthBufferBits;
 
