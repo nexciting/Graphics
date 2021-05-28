@@ -66,6 +66,8 @@ namespace UnityEngine.Rendering.Universal
 
     class XRPass
     {
+        internal static readonly RTHandle cameraTarget = RTHandles.Alloc(BuiltinRenderTextureType.CameraTarget);
+
         internal List<XRView> views = new List<XRView>(2);
 
         internal bool enabled      { get => views.Count > 0; }
@@ -76,9 +78,9 @@ namespace UnityEngine.Rendering.Universal
         internal int cullingPassId  { get; private set; }
 
         // Ability to specify where to render the pass
-        internal RenderTargetIdentifier  renderTarget     { get; private set; }
+        internal RTHandle                renderTarget     { get; private set; }
         internal RenderTextureDescriptor renderTargetDesc { get; private set; }
-        static   RenderTargetIdentifier  invalidRT = -1;
+        static   RTHandle                invalidRT = null;
         internal bool                    renderTargetValid { get => renderTarget != invalidRT; }
         internal bool                    renderTargetIsRenderTexture { get; private set; }
         internal bool isLateLatchEnabled { get; set; }
@@ -143,7 +145,7 @@ namespace UnityEngine.Rendering.Universal
 
             if (createInfo.renderTarget != null)
             {
-                passInfo.renderTarget = new RenderTargetIdentifier(createInfo.renderTarget, 0, CubemapFace.Unknown, -1);
+                passInfo.renderTarget = RTHandles.Alloc(new RenderTargetIdentifier(createInfo.renderTarget, 0, CubemapFace.Unknown, -1));
                 passInfo.renderTargetDesc = createInfo.renderTarget.descriptor;
                 passInfo.renderTargetIsRenderTexture = createInfo.renderTargetIsRenderTexture;
             }
@@ -197,8 +199,7 @@ namespace UnityEngine.Rendering.Universal
             passInfo.cullingParams = cullingParameters;
             passInfo.views.Clear();
 
-            // URP ScriptableRenderer does not track current active depth slice state. We make sure to set all texture slices(-1) across the pipeline to ensure consistency.
-            passInfo.renderTarget = new RenderTargetIdentifier(xrRenderPass.renderTarget, 0, CubemapFace.Unknown, -1);
+            passInfo.renderTarget = RTHandles.Alloc(new RenderTargetIdentifier(xrRenderPass.renderTarget, 0, CubemapFace.Unknown, -1));
 
             RenderTextureDescriptor xrDesc = xrRenderPass.renderTargetDesc;
             RenderTextureDescriptor rtDesc = new RenderTextureDescriptor(xrDesc.width, xrDesc.height, xrDesc.colorFormat, xrDesc.depthBufferBits, xrDesc.mipCount);
@@ -230,6 +231,7 @@ namespace UnityEngine.Rendering.Universal
 
         internal static void Release(XRPass xrPass)
         {
+            xrPass.renderTarget?.Release();
             GenericPool<XRPass>.Release(xrPass);
         }
 
@@ -483,6 +485,19 @@ namespace UnityEngine.Rendering.Universal
             cmd.UnmarkLateLatchMatrix(CameraLateLatchMatrixType.InverseViewProjection);
             cameraData.xr.hasMarkedLateLatch = false;
         }
+
+        internal RTHandle CameraTarget
+        {
+            get
+            {
+                if (enabled)
+                {
+                    return renderTarget;
+                }
+
+                return cameraTarget;
+            }
+        }
     }
 }
 
@@ -492,12 +507,14 @@ namespace UnityEngine.Rendering.Universal
     internal class XRPass
     {
         internal static readonly XRPass emptyPass = new XRPass();
+        internal static readonly RTHandle cameraTarget = RTHandles.Alloc(BuiltinRenderTextureType.CameraTarget);
 
         internal bool enabled { get => false; }
         internal void StartSinglePass(CommandBuffer cmd) { }
         internal void StopSinglePass(CommandBuffer cmd) { }
         internal void EndCamera(CommandBuffer cmd, CameraData camera) { }
         internal void RenderOcclusionMesh(CommandBuffer cmd) { }
+        internal RTHandle CameraTarget { get => cameraTarget; }
     }
 }
 #endif

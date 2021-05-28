@@ -67,7 +67,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                 {
                     int depthSlice = cameraData.xr.singlePassEnabled ? -1 : cameraData.xr.GetTextureArraySlice();
                     cameraTarget =
-                        new RenderTargetIdentifier(cameraData.xr.renderTarget, 0, CubemapFace.Unknown, depthSlice);
+                        new RenderTargetIdentifier(cameraData.xr.renderTarget.nameID, 0, CubemapFace.Unknown, depthSlice);
 
                     CoreUtils.SetRenderTarget(
                         cmd,
