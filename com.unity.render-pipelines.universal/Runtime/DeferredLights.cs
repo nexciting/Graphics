@@ -791,7 +791,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             RTHandle depthCopyTexture,
             RTHandle depthInfoTexture,
             RTHandle tileDepthInfoTexture,
-            RenderTargetHandle depthAttachment,
+            RTHandle depthAttachment,
             RenderTargetHandle colorAttachment)
         {
             m_AdditionalLightsShadowCasterPass = additionalLightsShadowCasterPass;
@@ -803,7 +803,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             this.TileDepthInfoTexture = new RenderTargetHandle(tileDepthInfoTexture);
 
             this.GbufferAttachments[this.GBufferLightingIndex] = colorAttachment;
-            this.DepthAttachment = depthAttachment;
+            this.DepthAttachment = new RenderTargetHandle(depthAttachment);
 
             this.DepthCopyTextureIdentifier = this.DepthCopyTexture.Identifier();
             this.DepthInfoTextureIdentifier = this.DepthInfoTexture.Identifier();
@@ -826,7 +826,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     this.GbufferAttachmentIdentifiers[2], this.GbufferAttachmentIdentifiers[4]
                 };
             }
-            this.DepthAttachmentIdentifier = depthAttachment.Identifier();
+            this.DepthAttachmentIdentifier = this.DepthAttachment.Identifier();
 #if ENABLE_VR && ENABLE_XR_MODULE
             // In XR SinglePassInstance mode, the RTs are texture-array and all slices must be bound.
             if (renderingData.cameraData.xr.enabled)
