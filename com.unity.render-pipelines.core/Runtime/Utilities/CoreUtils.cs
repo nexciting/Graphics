@@ -609,7 +609,14 @@ namespace UnityEngine.Rendering
             RTHandle depthBuffer, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction,
             ClearFlag clearFlag, Color clearColor)
         {
-            cmd.SetRenderTarget(colorBuffer.rt, colorLoadAction, colorStoreAction, depthBuffer.rt, depthLoadAction, depthStoreAction);
+            if (colorBuffer.rt != null && depthBuffer.rt != null)
+            {
+                cmd.SetRenderTarget(colorBuffer.rt, colorLoadAction, colorStoreAction, depthBuffer.rt, depthLoadAction, depthStoreAction);
+            }
+            else
+            {
+                cmd.SetRenderTarget(colorBuffer.nameID, colorLoadAction, colorStoreAction, depthBuffer.nameID, depthLoadAction, depthStoreAction);
+            }
             SetViewportAndClear(cmd, colorBuffer, clearFlag, clearColor);
         }
 
