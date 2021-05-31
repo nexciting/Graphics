@@ -31,8 +31,8 @@ namespace UnityEngine.Rendering.Universal
         internal ColorGradingLutPass colorGradingLutPass { get => m_PostProcessPasses.colorGradingLutPass; }
         internal PostProcessPass postProcessPass { get => m_PostProcessPasses.postProcessPass; }
         internal PostProcessPass finalPostProcessPass { get => m_PostProcessPasses.finalPostProcessPass; }
-        internal RenderTargetHandle afterPostProcessColorHandle { get => m_PostProcessPasses.afterPostProcessColor; }
-        internal RenderTargetHandle colorGradingLutHandle { get => m_PostProcessPasses.colorGradingLut; }
+        internal RTHandle afterPostProcessColorHandle { get => m_PostProcessPasses.afterPostProcessColor; }
+        internal RTHandle colorGradingLutHandle { get => m_PostProcessPasses.colorGradingLut; }
 
         public Renderer2D(Renderer2DData data) : base(data)
         {
@@ -228,8 +228,8 @@ namespace UnityEngine.Rendering.Universal
 
             if (stackHasPostProcess && m_PostProcessPasses.isCreated)
             {
-                RenderTargetHandle postProcessDestHandle =
-                    lastCameraInStack && !ppcUpscaleRT && !requireFinalPostProcessPass ? RenderTargetHandle.CameraTarget : afterPostProcessColorHandle;
+                RTHandle postProcessDestHandle =
+                    lastCameraInStack && !ppcUpscaleRT && !requireFinalPostProcessPass ? k_CameraTarget : afterPostProcessColorHandle;
 
                 postProcessPass.Setup(
                     cameraTargetDescriptor,
@@ -238,10 +238,10 @@ namespace UnityEngine.Rendering.Universal
                     depthTargetHandle,
                     colorGradingLutHandle,
                     requireFinalPostProcessPass,
-                    postProcessDestHandle == RenderTargetHandle.CameraTarget);
+                    postProcessDestHandle.nameID == k_CameraTarget.nameID);
 
                 EnqueuePass(postProcessPass);
-                colorTargetHandle = postProcessDestHandle;
+                colorTargetHandle = new RenderTargetHandle(postProcessDestHandle);
             }
 
             if (ppc != null && ppc.enabled && (ppc.cropFrame == PixelPerfectCamera.CropFrame.Pillarbox || ppc.cropFrame == PixelPerfectCamera.CropFrame.Letterbox || ppc.cropFrame == PixelPerfectCamera.CropFrame.Windowbox || ppc.cropFrame == PixelPerfectCamera.CropFrame.StretchFill))

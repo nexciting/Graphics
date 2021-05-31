@@ -1,3 +1,5 @@
+using System;
+
 namespace UnityEngine.Rendering.Universal.Internal
 {
     /// <summary>
@@ -26,9 +28,20 @@ namespace UnityEngine.Rendering.Universal.Internal
         /// </summary>
         /// <param name="baseDescriptor"></param>
         /// <param name="colorHandle"></param>
+        [Obsolete]
         public void Setup(RenderTextureDescriptor baseDescriptor, RenderTargetHandle colorHandle)
         {
             m_Source = colorHandle.id;
+        }
+
+        /// <summary>
+        /// Configure the pass
+        /// </summary>
+        /// <param name="baseDescriptor"></param>
+        /// <param name="colorHandle"></param>
+        public void Setup(RenderTextureDescriptor baseDescriptor, RTHandle colorHandle)
+        {
+            m_Source = colorHandle.nameID;
         }
 
         /// <inheritdoc/>

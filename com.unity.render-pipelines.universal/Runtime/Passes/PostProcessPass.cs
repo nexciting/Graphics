@@ -532,6 +532,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_UseSwapBuffer = false;
         }
 
+        [Obsolete]
         public void SetupFinalPass(in RenderTargetHandle source, bool useSwapBuffer = false)
         {
             m_Source = source.Identifier();
@@ -540,6 +541,15 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_HasFinalPass = false;
             m_EnableSRGBConversionIfNeeded = true;
             m_UseSwapBuffer = useSwapBuffer;
+        }
+
+        public void SetupFinalPass(in RTHandle source)
+        {
+            m_Source = source.nameID;
+            m_Destination = RenderTargetHandle.CameraTarget;
+            m_IsFinalPass = true;
+            m_HasFinalPass = false;
+            m_EnableSRGBConversionIfNeeded = true;
         }
 
         /// <inheritdoc/>
