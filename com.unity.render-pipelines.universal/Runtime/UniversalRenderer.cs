@@ -536,13 +536,12 @@ namespace UnityEngine.Rendering.Universal
                 // RTHandles do not support combining color and depth in the same texture so we create them seperately
                 createDepthTexture = intermediateRenderTexture;
 
-                m_ActiveCameraColorAttachment = createColorTexture ? m_ColorBufferSystem.GetBackBuffer() : cameraTargetHandle;
-                m_ActiveCameraDepthAttachment = createDepthTexture ? m_CameraDepthAttachment : cameraTargetHandle;
-
-
                 // Doesn't create texture for Overlay cameras as they are already overlaying on top of created textures.
                 if (intermediateRenderTexture)
                     CreateCameraRenderTarget(context, ref cameraTargetDescriptor, useDepthPriming);
+
+                m_ActiveCameraColorAttachment = createColorTexture ? m_ColorBufferSystem.GetBackBuffer() : cameraTargetHandle;
+                m_ActiveCameraDepthAttachment = createDepthTexture ? m_CameraDepthAttachment : cameraTargetHandle;
             }
             else
             {
@@ -1003,7 +1002,7 @@ namespace UnityEngine.Rendering.Universal
             CommandBuffer cmd = CommandBufferPool.Get();
             using (new ProfilingScope(null, Profiling.createCameraRenderTarget))
             {
-                if (m_ActiveCameraColorAttachment.nameID != BuiltinRenderTextureType.CameraTarget)
+                if (m_ColorBufferSystem.GetBackBuffer().nameID != BuiltinRenderTextureType.CameraTarget)
                 {
                     var colorDescriptor = descriptor;
                     colorDescriptor.useMipMap = false;
@@ -1015,7 +1014,7 @@ namespace UnityEngine.Rendering.Universal
                     cmd.SetGlobalTexture("_CameraColorTexture", m_ActiveCameraColorAttachment.nameID);
                 }
 
-                if (m_ActiveCameraDepthAttachment.nameID != BuiltinRenderTextureType.CameraTarget)
+                if (m_CameraDepthAttachment.nameID != BuiltinRenderTextureType.CameraTarget)
                 {
                     var depthDescriptor = descriptor;
                     depthDescriptor.useMipMap = false;
@@ -1024,7 +1023,7 @@ namespace UnityEngine.Rendering.Universal
 
                     depthDescriptor.colorFormat = RenderTextureFormat.Depth;
                     depthDescriptor.depthBufferBits = (int)k_DepthStencilBufferBits;
-                    cmd.GetTemporaryRT(Shader.PropertyToID(m_ActiveCameraDepthAttachment.name), depthDescriptor, FilterMode.Point);
+                    cmd.GetTemporaryRT(Shader.PropertyToID(m_CameraDepthAttachment.name), depthDescriptor, FilterMode.Point);
                 }
             }
 
