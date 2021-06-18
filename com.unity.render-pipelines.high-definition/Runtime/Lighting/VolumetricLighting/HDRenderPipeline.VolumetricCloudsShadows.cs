@@ -39,12 +39,12 @@ namespace UnityEngine.Rendering.HighDefinition
             return HasVolumetricCloudsShadows(hdCamera, settings);
         }
 
-        bool HasVolumetricCloudsShadows_IgnoreSun(HDCamera hdCamera, in VolumetricClouds settings)
+        internal bool HasVolumetricCloudsShadows_IgnoreSun(HDCamera hdCamera, in VolumetricClouds settings)
         {
             return (HasVolumetricClouds(hdCamera, in settings) && settings.shadows.value);
         }
 
-        bool HasVolumetricCloudsShadows_IgnoreSun(HDCamera hdCamera)
+        internal bool HasVolumetricCloudsShadows_IgnoreSun(HDCamera hdCamera)
         {
             VolumetricClouds settings = hdCamera.volumeStack.GetComponent<VolumetricClouds>();
             return HasVolumetricCloudsShadows_IgnoreSun(hdCamera, settings);
@@ -157,7 +157,7 @@ namespace UnityEngine.Rendering.HighDefinition
             return m_VolumetricCloudsShadowTexture[shadowResIndex];
         }
 
-        CookieParameters RenderVolumetricCloudsShadows(CommandBuffer cmd, HDCamera hdCamera)
+        internal CookieParameters RenderVolumetricCloudsShadows(CommandBuffer cmd, HDCamera hdCamera)
         {
             VolumetricClouds settings = hdCamera.volumeStack.GetComponent<VolumetricClouds>();
 
