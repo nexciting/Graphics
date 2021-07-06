@@ -115,7 +115,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             {
                 ConfigureTarget(
                     new RenderTargetIdentifier(normalHandle.Identifier(), 0, CubemapFace.Unknown, -1),
-                    new RenderTargetIdentifier(depthHandle.nameID, 0, CubemapFace.Unknown, -1)
+                    depthHandle
                 );
             }
 

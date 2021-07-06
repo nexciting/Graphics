@@ -263,7 +263,6 @@ namespace UnityEngine.Rendering.Universal
             // RenderTexture format depends on camera and pipeline (HDR, non HDR, etc)
             // Samples (MSAA) depend on camera and pipeline
             m_ColorBufferSystem = new RenderTargetBufferSystem("_CameraColorAttachment");
-            m_CameraDepthAttachment = RTHandles.Alloc(new RenderTargetIdentifier(Shader.PropertyToID("_CameraDepthAttachment"), 0, CubemapFace.Unknown, -1), "_CameraDepthAttachment");
             m_DepthTexture = RTHandles.Alloc(new RenderTargetIdentifier(Shader.PropertyToID("_CameraDepthTexture"), 0, CubemapFace.Unknown, -1), "_CameraDepthTexture");
             m_DepthTextureAlloc = false;
             m_NormalsTexture = RTHandles.Alloc(new RenderTargetIdentifier(Shader.PropertyToID("_CameraNormalsTexture"), 0, CubemapFace.Unknown, -1), "_CameraNormalsTexture");
@@ -362,6 +361,27 @@ namespace UnityEngine.Rendering.Universal
                     DebugHandler.ResetDebugRenderTarget();
                 }
             }
+        }
+
+        static bool RTHandleNeedsRealloc(RTHandle handle, in RenderTextureDescriptor descriptor, bool scaled)
+        {
+            if (handle == null || handle.rt == null)
+                return true;
+            if (handle.useScaling != scaled)
+                return true;
+            if (!scaled && (handle.rt.width != descriptor.width || handle.rt.height != descriptor.height))
+                return true;
+            return
+                handle.rt.descriptor.depthBufferBits != descriptor.depthBufferBits ||
+                (handle.rt.descriptor.depthBufferBits == (int)DepthBits.None && handle.rt.descriptor.graphicsFormat != descriptor.graphicsFormat) ||
+                handle.rt.descriptor.dimension != descriptor.dimension ||
+                handle.rt.descriptor.enableRandomWrite != descriptor.enableRandomWrite ||
+                handle.rt.descriptor.useMipMap != descriptor.useMipMap ||
+                handle.rt.descriptor.autoGenerateMips != descriptor.autoGenerateMips ||
+                handle.rt.descriptor.msaaSamples != descriptor.msaaSamples ||
+                handle.rt.descriptor.bindMS != descriptor.bindMS ||
+                handle.rt.descriptor.useDynamicScale != descriptor.useDynamicScale ||
+                handle.rt.descriptor.memoryless != descriptor.memoryless;
         }
 
         /// <inheritdoc />
@@ -901,18 +921,8 @@ namespace UnityEngine.Rendering.Universal
         public override void FinishRendering(CommandBuffer cmd)
         {
             m_ColorBufferSystem.Clear(cmd);
-
-            if (m_ActiveCameraColorAttachment != k_CameraTarget.nameID)
-            {
-                m_ActiveCameraColorAttachment = k_CameraTarget;
-            }
-
-            if (m_ActiveCameraDepthAttachment.nameID != k_CameraTarget.nameID)
-            {
-                Debug.Assert(m_ActiveCameraDepthAttachment.name.Length > 0);
-                cmd.ReleaseTemporaryRT(Shader.PropertyToID(m_ActiveCameraDepthAttachment.name));
-                m_ActiveCameraDepthAttachment = k_CameraTarget;
-            }
+            m_ActiveCameraColorAttachment = null;
+            m_ActiveCameraDepthAttachment = null;
 
             if (m_DepthTextureAlloc)
             {
@@ -1032,7 +1042,7 @@ namespace UnityEngine.Rendering.Universal
                     cmd.SetGlobalTexture("_CameraColorTexture", m_ActiveCameraColorAttachment.nameID);
                 }
 
-                if (m_CameraDepthAttachment.nameID != BuiltinRenderTextureType.CameraTarget)
+                if (m_CameraDepthAttachment == null || m_CameraDepthAttachment.nameID != BuiltinRenderTextureType.CameraTarget)
                 {
                     var depthDescriptor = descriptor;
                     depthDescriptor.useMipMap = false;
@@ -1041,7 +1051,12 @@ namespace UnityEngine.Rendering.Universal
 
                     depthDescriptor.colorFormat = RenderTextureFormat.Depth;
                     depthDescriptor.depthBufferBits = (int)k_DepthStencilBufferBits;
-                    cmd.GetTemporaryRT(Shader.PropertyToID(m_CameraDepthAttachment.name), depthDescriptor, FilterMode.Point);
+                    if (RTHandleNeedsRealloc(m_CameraDepthAttachment, depthDescriptor, false))
+                    {
+                        m_CameraDepthAttachment?.Release();
+                        m_CameraDepthAttachment = RTHandles.Alloc(depthDescriptor, filterMode: FilterMode.Point, wrapMode: TextureWrapMode.Clamp, name: "_CameraDepthAttachment");
+                    }
+                    cmd.SetGlobalTexture(m_CameraDepthAttachment.name, m_CameraDepthAttachment.nameID);
                 }
             }
 
