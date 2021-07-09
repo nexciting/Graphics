@@ -183,34 +183,6 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_UseSwapBuffer = useSwapBuffer;
         }
 
-        /// <inheritdoc/>
-        public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
-        {
-            if (m_Destination == k_CameraTarget)
-                return;
-
-            // If RenderTargetHandle already has a valid internal render target identifier, we shouldn't request a temp
-            if (m_Destination.rt != null)
-                return;
-
-            var desc = GetCompatibleDescriptor();
-            desc.depthBufferBits = 0;
-            cmd.GetTemporaryRT(Shader.PropertyToID(m_Destination.name), desc, FilterMode.Point);
-        }
-
-        /// <inheritdoc/>
-        public override void OnCameraCleanup(CommandBuffer cmd)
-        {
-            if (m_Destination == k_CameraTarget)
-                return;
-
-            // Logic here matches the if check in OnCameraSetup
-            if (m_Destination.rt != null)
-                return;
-
-            cmd.ReleaseTemporaryRT(Shader.PropertyToID(m_Destination.name));
-        }
-
         public void ResetHistory()
         {
             m_ResetHistory = true;
@@ -279,8 +251,10 @@ namespace UnityEngine.Rendering.Universal.Internal
             => GetCompatibleDescriptor(m_Descriptor.width, m_Descriptor.height, m_Descriptor.graphicsFormat);
 
         RenderTextureDescriptor GetCompatibleDescriptor(int width, int height, GraphicsFormat format, DepthBits depthBufferBits = DepthBits.None)
+            => GetCompatibleDescriptor(m_Descriptor, width, height, format, depthBufferBits);
+
+        internal static RenderTextureDescriptor GetCompatibleDescriptor(RenderTextureDescriptor desc, int width, int height, GraphicsFormat format, DepthBits depthBufferBits = DepthBits.None)
         {
-            var desc = m_Descriptor;
             desc.depthBufferBits = (int)depthBufferBits;
             desc.msaaSamples = 1;
             desc.width = width;
