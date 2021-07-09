@@ -22,10 +22,10 @@ namespace UnityEngine.Rendering.Universal.Internal
     public class PostProcessPass : ScriptableRenderPass
     {
         RenderTextureDescriptor m_Descriptor;
-        RenderTargetIdentifier m_Source;
-        RenderTargetHandle m_Destination;
-        RenderTargetHandle m_Depth;
-        RenderTargetHandle m_InternalLut;
+        RTHandle m_Source;
+        RTHandle m_Destination;
+        RTHandle m_Depth;
+        RTHandle m_InternalLut;
 
         const string k_RenderPostProcessingTag = "Render PostProcessing Effects";
         const string k_RenderFinalPostProcessingTag = "Render Final PostProcessing Pass";
@@ -142,379 +142,20 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         public void Cleanup() => m_Materials.Cleanup();
 
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, bool resolveToScreen, in RenderTargetHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.Identifier();
-            m_Depth = depth;
-            m_InternalLut = internalLut;
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_ResolveToScreen = resolveToScreen;
-            m_Destination = RenderTargetHandle.CameraTarget;
-            m_UseSwapBuffer = true;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RTHandle source, bool resolveToScreen, in RenderTargetHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.nameID;
-            m_Depth = depth;
-            m_InternalLut = internalLut;
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_ResolveToScreen = resolveToScreen;
-            m_Destination = RenderTargetHandle.CameraTarget;
-            m_UseSwapBuffer = true;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, bool resolveToScreen, in RTHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.Identifier();
-            m_Depth = new RenderTargetHandle(depth);
-            m_InternalLut = internalLut;
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_ResolveToScreen = resolveToScreen;
-            m_Destination = RenderTargetHandle.CameraTarget;
-            m_UseSwapBuffer = true;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RTHandle source, bool resolveToScreen, in RTHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.nameID;
-            m_Depth = new RenderTargetHandle(depth);
-            m_InternalLut = internalLut;
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_ResolveToScreen = resolveToScreen;
-            m_Destination = RenderTargetHandle.CameraTarget;
-            m_UseSwapBuffer = true;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, bool resolveToScreen, in RenderTargetHandle depth, in RTHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.Identifier();
-            m_Depth = depth;
-            m_InternalLut = new RenderTargetHandle(internalLut);
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_ResolveToScreen = resolveToScreen;
-            m_Destination = RenderTargetHandle.CameraTarget;
-            m_UseSwapBuffer = true;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RTHandle source, bool resolveToScreen, in RenderTargetHandle depth, in RTHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.nameID;
-            m_Depth = depth;
-            m_InternalLut = new RenderTargetHandle(internalLut);
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_ResolveToScreen = resolveToScreen;
-            m_Destination = RenderTargetHandle.CameraTarget;
-            m_UseSwapBuffer = true;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, bool resolveToScreen, in RTHandle depth, in RTHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.Identifier();
-            m_Depth = new RenderTargetHandle(depth);
-            m_InternalLut = new RenderTargetHandle(internalLut);
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_ResolveToScreen = resolveToScreen;
-            m_Destination = RenderTargetHandle.CameraTarget;
-            m_UseSwapBuffer = true;
-        }
-
         public void Setup(in RenderTextureDescriptor baseDescriptor, in RTHandle source, bool resolveToScreen, in RTHandle depth, in RTHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
         {
             m_Descriptor = baseDescriptor;
             m_Descriptor.useMipMap = false;
             m_Descriptor.autoGenerateMips = false;
-            m_Source = source.nameID;
-            m_Depth = new RenderTargetHandle(depth);
-            m_InternalLut = new RenderTargetHandle(internalLut);
+            m_Source = source;
+            m_Depth = depth;
+            m_InternalLut = internalLut;
             m_IsFinalPass = false;
             m_HasFinalPass = hasFinalPass;
             m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
             m_ResolveToScreen = resolveToScreen;
-            m_Destination = RenderTargetHandle.CameraTarget;
+            m_Destination = k_CameraTarget;
             m_UseSwapBuffer = true;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, RenderTargetHandle destination, in RenderTargetHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.Identifier();
-            m_Destination = destination;
-            m_Depth = depth;
-            m_InternalLut = internalLut;
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RTHandle source, RenderTargetHandle destination, in RenderTargetHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.nameID;
-            m_Destination = destination;
-            m_Depth = depth;
-            m_InternalLut = internalLut;
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, RTHandle destination, in RenderTargetHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.Identifier();
-            m_Destination = new RenderTargetHandle(destination);
-            m_Depth = depth;
-            m_InternalLut = internalLut;
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RTHandle source, RTHandle destination, in RenderTargetHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.nameID;
-            m_Destination = new RenderTargetHandle(destination);
-            m_Depth = depth;
-            m_InternalLut = internalLut;
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, RenderTargetHandle destination, in RTHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.Identifier();
-            m_Destination = destination;
-            m_Depth = new RenderTargetHandle(depth);
-            m_InternalLut = internalLut;
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RTHandle source, RenderTargetHandle destination, in RTHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.nameID;
-            m_Destination = destination;
-            m_Depth = new RenderTargetHandle(depth);
-            m_InternalLut = internalLut;
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, RTHandle destination, in RTHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.Identifier();
-            m_Destination = new RenderTargetHandle(destination);
-            m_Depth = new RenderTargetHandle(depth);
-            m_InternalLut = internalLut;
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RTHandle source, RTHandle destination, in RTHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.nameID;
-            m_Destination = new RenderTargetHandle(destination);
-            m_Depth = new RenderTargetHandle(depth);
-            m_InternalLut = internalLut;
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, RenderTargetHandle destination, in RenderTargetHandle depth, in RTHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.Identifier();
-            m_Destination = destination;
-            m_Depth = depth;
-            m_InternalLut = new RenderTargetHandle(internalLut);
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RTHandle source, RenderTargetHandle destination, in RenderTargetHandle depth, in RTHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.nameID;
-            m_Destination = destination;
-            m_Depth = depth;
-            m_InternalLut = new RenderTargetHandle(internalLut);
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, RTHandle destination, in RenderTargetHandle depth, in RTHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.Identifier();
-            m_Destination = new RenderTargetHandle(destination);
-            m_Depth = depth;
-            m_InternalLut = new RenderTargetHandle(internalLut);
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RTHandle source, RTHandle destination, in RenderTargetHandle depth, in RTHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.nameID;
-            m_Destination = new RenderTargetHandle(destination);
-            m_Depth = depth;
-            m_InternalLut = new RenderTargetHandle(internalLut);
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, RenderTargetHandle destination, in RTHandle depth, in RTHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.Identifier();
-            m_Destination = destination;
-            m_Depth = new RenderTargetHandle(depth);
-            m_InternalLut = new RenderTargetHandle(internalLut);
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RTHandle source, RenderTargetHandle destination, in RTHandle depth, in RTHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.nameID;
-            m_Destination = destination;
-            m_Depth = new RenderTargetHandle(depth);
-            m_InternalLut = new RenderTargetHandle(internalLut);
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
-        }
-
-        [Obsolete]
-        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, RTHandle destination, in RTHandle depth, in RTHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
-        {
-            m_Descriptor = baseDescriptor;
-            m_Descriptor.useMipMap = false;
-            m_Descriptor.autoGenerateMips = false;
-            m_Source = source.Identifier();
-            m_Destination = new RenderTargetHandle(destination);
-            m_Depth = new RenderTargetHandle(depth);
-            m_InternalLut = new RenderTargetHandle(internalLut);
-            m_IsFinalPass = false;
-            m_HasFinalPass = hasFinalPass;
-            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
-            m_UseSwapBuffer = false;
         }
 
         public void Setup(in RenderTextureDescriptor baseDescriptor, in RTHandle source, RTHandle destination, in RTHandle depth, in RTHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
@@ -522,62 +163,52 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_Descriptor = baseDescriptor;
             m_Descriptor.useMipMap = false;
             m_Descriptor.autoGenerateMips = false;
-            m_Source = source.nameID;
-            m_Destination = new RenderTargetHandle(destination);
-            m_Depth = new RenderTargetHandle(depth);
-            m_InternalLut = new RenderTargetHandle(internalLut);
+            m_Source = source;
+            m_Destination = destination;
+            m_Depth = depth;
+            m_InternalLut = internalLut;
             m_IsFinalPass = false;
             m_HasFinalPass = hasFinalPass;
             m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
             m_UseSwapBuffer = false;
         }
 
-        [Obsolete]
-        public void SetupFinalPass(in RenderTargetHandle source, bool useSwapBuffer = false)
+        public void SetupFinalPass(in RTHandle source, bool useSwapBuffer = false)
         {
-            m_Source = source.Identifier();
-            m_Destination = RenderTargetHandle.CameraTarget;
+            m_Source = source;
+            m_Destination = k_CameraTarget;
             m_IsFinalPass = true;
             m_HasFinalPass = false;
             m_EnableSRGBConversionIfNeeded = true;
             m_UseSwapBuffer = useSwapBuffer;
         }
 
-        public void SetupFinalPass(in RTHandle source)
-        {
-            m_Source = source.nameID;
-            m_Destination = RenderTargetHandle.CameraTarget;
-            m_IsFinalPass = true;
-            m_HasFinalPass = false;
-            m_EnableSRGBConversionIfNeeded = true;
-        }
-
         /// <inheritdoc/>
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
-            if (m_Destination == RenderTargetHandle.CameraTarget)
+            if (m_Destination == k_CameraTarget)
                 return;
 
             // If RenderTargetHandle already has a valid internal render target identifier, we shouldn't request a temp
-            if (m_Destination.HasInternalRenderTargetId())
+            if (m_Destination.rt != null)
                 return;
 
             var desc = GetCompatibleDescriptor();
             desc.depthBufferBits = 0;
-            cmd.GetTemporaryRT(m_Destination.id, desc, FilterMode.Point);
+            cmd.GetTemporaryRT(Shader.PropertyToID(m_Destination.name), desc, FilterMode.Point);
         }
 
         /// <inheritdoc/>
         public override void OnCameraCleanup(CommandBuffer cmd)
         {
-            if (m_Destination == RenderTargetHandle.CameraTarget)
+            if (m_Destination == k_CameraTarget)
                 return;
 
             // Logic here matches the if check in OnCameraSetup
-            if (m_Destination.HasInternalRenderTargetId())
+            if (m_Destination.rt != null)
                 return;
 
-            cmd.ReleaseTemporaryRT(m_Destination.id);
+            cmd.ReleaseTemporaryRT(Shader.PropertyToID(m_Destination.name));
         }
 
         public void ResetHistory()
@@ -647,10 +278,10 @@ namespace UnityEngine.Rendering.Universal.Internal
         RenderTextureDescriptor GetCompatibleDescriptor()
             => GetCompatibleDescriptor(m_Descriptor.width, m_Descriptor.height, m_Descriptor.graphicsFormat);
 
-        RenderTextureDescriptor GetCompatibleDescriptor(int width, int height, GraphicsFormat format, int depthBufferBits = 0)
+        RenderTextureDescriptor GetCompatibleDescriptor(int width, int height, GraphicsFormat format, DepthBits depthBufferBits = DepthBits.None)
         {
             var desc = m_Descriptor;
-            desc.depthBufferBits = depthBufferBits;
+            desc.depthBufferBits = (int)depthBufferBits;
             desc.msaaSamples = 1;
             desc.width = width;
             desc.height = height;
@@ -876,15 +507,15 @@ namespace UnityEngine.Rendering.Universal.Internal
                 cmd.SetGlobalTexture(ShaderPropertyId.sourceTex, GetSource());
 
                 var colorLoadAction = RenderBufferLoadAction.DontCare;
-                if (m_Destination == RenderTargetHandle.CameraTarget && !cameraData.isDefaultViewport)
+                if (m_Destination == k_CameraTarget && !cameraData.isDefaultViewport)
                     colorLoadAction = RenderBufferLoadAction.Load;
 
-                RenderTargetIdentifier targetDestination = m_UseSwapBuffer ? destination : m_Destination.id;
+                RenderTargetIdentifier targetDestination = m_UseSwapBuffer ? destination : m_Destination.nameID;
 
                 // Note: We rendering to "camera target" we need to get the cameraData.targetTexture as this will get the targetTexture of the camera stack.
                 // Overlay cameras need to output to the target described in the base camera while doing camera stack.
-                RenderTargetHandle cameraTargetHandle = RenderTargetHandle.GetCameraTarget(cameraData.xr);
-                RenderTargetIdentifier cameraTarget = (cameraData.targetTexture != null && !cameraData.xr.enabled) ? new RenderTargetIdentifier(cameraData.targetTexture) : cameraTargetHandle.Identifier();
+                RTHandle cameraTargetHandle = cameraData.xr.CameraTarget;
+                RenderTargetIdentifier cameraTarget = (cameraData.targetTexture != null && !cameraData.xr.enabled) ? new RenderTargetIdentifier(cameraData.targetTexture) : cameraTargetHandle.nameID;
 
                 if (m_UseSwapBuffer)
                 {
@@ -892,8 +523,8 @@ namespace UnityEngine.Rendering.Universal.Internal
                 }
                 else
                 {
-                    cameraTarget = (m_Destination == RenderTargetHandle.CameraTarget) ? cameraTarget : m_Destination.Identifier();
-                    m_ResolveToScreen = cameraData.resolveFinalTarget || (m_Destination == cameraTargetHandle || m_HasFinalPass == true);
+                    cameraTarget = (m_Destination.nameID == BuiltinRenderTextureType.CameraTarget) ? cameraTarget : m_Destination.nameID;
+                    m_ResolveToScreen = cameraData.resolveFinalTarget || (m_Destination.nameID == cameraTargetHandle.nameID || m_HasFinalPass == true);
                 }
 
                 // With camera stacking we not always resolve post to final screen as we might run post-processing in the middle of the stack.
@@ -937,7 +568,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     cmd.SetRenderTarget(cameraTarget, colorLoadAction, RenderBufferStoreAction.Store, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
                     cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
 
-                    if ((m_Destination == RenderTargetHandle.CameraTarget && !m_UseSwapBuffer) || m_ResolveToScreen)
+                    if ((m_Destination.nameID == BuiltinRenderTextureType.CameraTarget && !m_UseSwapBuffer) || m_ResolveToScreen)
                         cmd.SetViewport(cameraData.pixelRect);
 
                     cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_Materials.uber);
@@ -1017,17 +648,17 @@ namespace UnityEngine.Rendering.Universal.Internal
 
             // Intermediate targets
             RenderTargetIdentifier stencil; // We would only need stencil, no depth. But Unity doesn't support that.
-            int tempDepthBits;
-            if (m_Depth == RenderTargetHandle.CameraTarget || m_Descriptor.msaaSamples > 1)
+            DepthBits tempDepthBits;
+            if (m_Depth == k_CameraTarget || m_Descriptor.msaaSamples > 1)
             {
                 // In case m_Depth is CameraTarget it may refer to the backbuffer and we can't use that as an attachment on all platforms
                 stencil = ShaderConstants._EdgeTexture;
-                tempDepthBits = 24;
+                tempDepthBits = DepthBits.Depth24;
             }
             else
             {
-                stencil = m_Depth.Identifier();
-                tempDepthBits = 0;
+                stencil = m_Depth.nameID;
+                tempDepthBits = DepthBits.None;
             }
             cmd.GetTemporaryRT(ShaderConstants._EdgeTexture, GetCompatibleDescriptor(m_Descriptor.width, m_Descriptor.height, m_SMAAEdgeFormat, tempDepthBits), FilterMode.Bilinear);
             cmd.GetTemporaryRT(ShaderConstants._BlendTexture, GetCompatibleDescriptor(m_Descriptor.width, m_Descriptor.height, GraphicsFormat.R8G8B8A8_UNorm), FilterMode.Point);
@@ -1638,7 +1269,7 @@ namespace UnityEngine.Rendering.Universal.Internal
 
             // Source material setup
             float postExposureLinear = Mathf.Pow(2f, m_ColorAdjustments.postExposure.value);
-            cmd.SetGlobalTexture(ShaderConstants._InternalLut, m_InternalLut.Identifier());
+            cmd.SetGlobalTexture(ShaderConstants._InternalLut, m_InternalLut.nameID);
             material.SetVector(ShaderConstants._Lut_Params, new Vector4(1f / lutWidth, 1f / lutHeight, lutHeight - 1f, postExposureLinear));
             material.SetTexture(ShaderConstants._UserLut, m_ColorLookup.texture.value);
             material.SetVector(ShaderConstants._UserLut_Params, !m_ColorLookup.IsActive()
@@ -1728,9 +1359,9 @@ namespace UnityEngine.Rendering.Universal.Internal
             {
                 cmd.SetGlobalTexture(ShaderPropertyId.sourceTex, m_Source);
             }
-            else if (m_Source == cameraData.renderer.GetCameraColorFrontBuffer(cmd))
+            else if (m_Source.nameID == cameraData.renderer.GetCameraColorFrontBuffer(cmd))
             {
-                m_Source = cameraData.renderer.cameraColorTarget;
+                m_Source = cameraData.renderer.cameraColorTargetHandle;
             }
 
             cmd.SetGlobalTexture(ShaderPropertyId.sourceTex, m_Source);
