@@ -427,20 +427,9 @@ namespace UnityEngine.Rendering.Universal
             // Assign the camera color target early in case it is needed during AddRenderPasses.
             bool isPreviewCamera = cameraData.isPreviewCamera;
             var createColorTexture = rendererFeatures.Count != 0 && !isPreviewCamera;
-            if (createColorTexture)
-            {
-                m_ActiveCameraColorAttachment = m_ColorBufferSystem.GetBackBuffer();
-                var activeColorRenderTargetId = m_ActiveCameraColorAttachment.nameID;
-#if ENABLE_VR && ENABLE_XR_MODULE
-                if (cameraData.xr.enabled) activeColorRenderTargetId = new RenderTargetIdentifier(activeColorRenderTargetId, 0, CubemapFace.Unknown, -1);
-#endif
-                ConfigureCameraColorTarget(activeColorRenderTargetId);
-            }
 
             // Add render passes and gather the input requirements
-            isCameraColorTargetValid = true;
             AddRenderPasses(ref renderingData);
-            isCameraColorTargetValid = false;
             RenderPassInputSummary renderPassInputs = GetRenderPassInputs(ref renderingData);
 
             // Should apply post-processing after rendering this camera?
@@ -557,23 +546,27 @@ namespace UnityEngine.Rendering.Universal
 
                 bool intermediateRenderTexture = createColorTexture || createDepthTexture;
 
-                // RTHandles do not support combining color and depth in the same texture so we create them seperately
+                // RTHandles do not support combining color and depth in the same texture so we create them separately
                 createDepthTexture = intermediateRenderTexture;
 
                 // Doesn't create texture for Overlay cameras as they are already overlaying on top of created textures.
                 if (intermediateRenderTexture)
                     CreateCameraRenderTarget(context, ref cameraTargetDescriptor, useDepthPriming);
 
-                m_ActiveCameraColorAttachment = createColorTexture ? m_ColorBufferSystem.GetBackBuffer() : cameraTargetHandle;
+                m_ActiveCameraColorAttachment = createColorTexture ? m_ColorBufferSystem.PeekBackBuffer() : cameraTargetHandle;
                 m_ActiveCameraDepthAttachment = createDepthTexture ? m_CameraDepthAttachment : cameraTargetHandle;
             }
             else
             {
                 cameraData.baseCamera.TryGetComponent<UniversalAdditionalCameraData>(out var baseCameraData);
                 var baseRenderer = (UniversalRenderer)baseCameraData.scriptableRenderer;
-                m_ActiveCameraColorAttachment = m_ColorBufferSystem.GetBackBuffer();
+                m_ColorBufferSystem = baseRenderer.m_ColorBufferSystem;
+                m_ActiveCameraColorAttachment = m_ColorBufferSystem.PeekBackBuffer();
                 m_ActiveCameraDepthAttachment = baseRenderer.m_ActiveCameraDepthAttachment;
             }
+
+            if (rendererFeatures.Count != 0 && !isPreviewCamera)
+                ConfigureCameraColorTarget(m_ColorBufferSystem.PeekBackBuffer());
 
             cameraData.renderer.useDepthPriming = useDepthPriming;
 
@@ -1049,7 +1042,7 @@ namespace UnityEngine.Rendering.Universal
             CommandBuffer cmd = CommandBufferPool.Get();
             using (new ProfilingScope(null, Profiling.createCameraRenderTarget))
             {
-                if (m_ColorBufferSystem.GetBackBuffer().nameID != BuiltinRenderTextureType.CameraTarget)
+                if (m_ColorBufferSystem.PeekBackBuffer() == null || m_ColorBufferSystem.PeekBackBuffer().nameID != BuiltinRenderTextureType.CameraTarget)
                 {
                     var colorDescriptor = descriptor;
                     colorDescriptor.useMipMap = false;
@@ -1171,7 +1164,7 @@ namespace UnityEngine.Rendering.Universal
             else
                 ConfigureCameraColorTarget(m_ColorBufferSystem.GetBackBuffer(cmd));
 
-            m_ActiveCameraColorAttachment = m_ColorBufferSystem.GetBackBuffer();
+            m_ActiveCameraColorAttachment = m_ColorBufferSystem.PeekBackBuffer();
             cmd.SetGlobalTexture("_CameraColorTexture", m_ActiveCameraColorAttachment.nameID);
         }
 

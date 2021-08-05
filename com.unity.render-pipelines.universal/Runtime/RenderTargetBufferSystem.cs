@@ -16,19 +16,36 @@ namespace UnityEngine.Rendering.Universal.Internal
         RenderTextureDescriptor m_Desc;
         FilterMode m_FilterMode;
 
-        int m_NameA;
-        int m_NameB;
+        string m_NameA;
+        string m_NameB;
 
         bool m_RTisAllocated = false;
 
+        static bool RTHandleNeedsRealloc(RTHandle handle, in RenderTextureDescriptor descriptor, bool scaled)
+        {
+            if (handle == null || handle.rt == null)
+                return true;
+            if (handle.useScaling != scaled)
+                return true;
+            if (!scaled && (handle.rt.width != descriptor.width || handle.rt.height != descriptor.height))
+                return true;
+            return
+                handle.rt.descriptor.depthBufferBits != descriptor.depthBufferBits ||
+                (handle.rt.descriptor.depthBufferBits == (int)DepthBits.None && handle.rt.descriptor.graphicsFormat != descriptor.graphicsFormat) ||
+                handle.rt.descriptor.dimension != descriptor.dimension ||
+                handle.rt.descriptor.enableRandomWrite != descriptor.enableRandomWrite ||
+                handle.rt.descriptor.useMipMap != descriptor.useMipMap ||
+                handle.rt.descriptor.autoGenerateMips != descriptor.autoGenerateMips ||
+                handle.rt.descriptor.msaaSamples != descriptor.msaaSamples ||
+                handle.rt.descriptor.bindMS != descriptor.bindMS ||
+                handle.rt.descriptor.useDynamicScale != descriptor.useDynamicScale ||
+                handle.rt.descriptor.memoryless != descriptor.memoryless;
+        }
+
         public RenderTargetBufferSystem(string name)
         {
-            string nameA = name + "A";
-            string nameB = name + "B";
-            m_NameA = Shader.PropertyToID(nameA);
-            m_NameB = Shader.PropertyToID(nameB);
-            RTA = RTHandles.Alloc(new RenderTargetIdentifier(m_NameA, 0, CubemapFace.Unknown, -1), nameA);
-            RTB = RTHandles.Alloc(new RenderTargetIdentifier(m_NameB, 0, CubemapFace.Unknown, -1), nameB);
+            m_NameA = name + "A";
+            m_NameB = name + "B";
         }
 
         public void Dispose()
@@ -37,7 +54,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             RTB?.Release();
         }
 
-        public RTHandle GetBackBuffer()
+        public RTHandle PeekBackBuffer()
         {
             return m_FirstIsBackBuffer ? RTA : RTB;
         }
@@ -63,23 +80,29 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         void Initialize(CommandBuffer cmd)
         {
-            cmd.GetTemporaryRT(m_NameA, m_Desc, m_FilterMode);
-            var descB = m_Desc;
-            descB.depthBufferBits = 0;
-            cmd.GetTemporaryRT(m_NameB, m_Desc, m_FilterMode);
+            if (RTHandleNeedsRealloc(RTA, m_Desc, false))
+            {
+                RTA?.Release();
+                RTA = RTHandles.Alloc(m_Desc, filterMode: m_FilterMode, wrapMode: TextureWrapMode.Clamp, name: m_NameA);
+                cmd.SetGlobalTexture(RTA.name, RTA);
+            }
+            if (RTHandleNeedsRealloc(RTB, m_Desc, false))
+            {
+                RTB?.Release();
+                RTB = RTHandles.Alloc(m_Desc, filterMode: m_FilterMode, wrapMode: TextureWrapMode.Clamp, name: m_NameB);
+                cmd.SetGlobalTexture(RTB.name, RTB);
+            }
             m_RTisAllocated = true;
         }
 
         public void Clear(CommandBuffer cmd)
         {
-            cmd.ReleaseTemporaryRT(m_NameA);
-            cmd.ReleaseTemporaryRT(m_NameB);
-
             m_FirstIsBackBuffer = true;
         }
 
         public void SetCameraSettings(CommandBuffer cmd, RenderTextureDescriptor desc, FilterMode filterMode)
         {
+            desc.depthBufferBits = 0;
             m_Desc = desc;
             m_FilterMode = filterMode;
 
