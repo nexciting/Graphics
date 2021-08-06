@@ -13,7 +13,7 @@ namespace UnityEngine.Rendering.Universal.Internal
     {
         private static readonly ShaderTagId k_ShaderTagId = new ShaderTagId("DepthOnly");
 
-        private RenderTargetHandle depthAttachmentHandle { get; set; }
+        private RTHandle destination { get; set; }
         private GraphicsFormat depthStencilFormat;
         internal ShaderTagId shaderTagId { get; set; } = k_ShaderTagId;
 
@@ -37,7 +37,8 @@ namespace UnityEngine.Rendering.Universal.Internal
             RenderTextureDescriptor baseDescriptor,
             RenderTargetHandle depthAttachmentHandle)
         {
-            this.depthAttachmentHandle = depthAttachmentHandle;
+            if (this.destination?.nameID != depthAttachmentHandle.Identifier())
+                this.destination = RTHandles.Alloc(depthAttachmentHandle.Identifier());
             this.depthStencilFormat = baseDescriptor.depthStencilFormat;
             this.shaderTagId = k_ShaderTagId;
         }
@@ -49,7 +50,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             RenderTextureDescriptor baseDescriptor,
             RTHandle depthAttachmentHandle)
         {
-            this.depthAttachmentHandle = new RenderTargetHandle(depthAttachmentHandle);
+            this.destination = depthAttachmentHandle;
             this.depthStencilFormat = baseDescriptor.depthStencilFormat;
             this.shaderTagId = k_ShaderTagId;
         }
@@ -66,7 +67,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             // When not using depth priming the camera target should be set to our non MSAA depth target.
             else
             {
-                ConfigureTarget(new RenderTargetIdentifier(depthAttachmentHandle.Identifier(), 0, CubemapFace.Unknown, -1), depthStencilFormat, desc.width, desc.height, 1, true);
+                ConfigureTarget(new RenderTargetIdentifier(destination.nameID, 0, CubemapFace.Unknown, -1), depthStencilFormat, desc.width, desc.height, 1, true);
             }
 
             // Only clear depth here so we don't clear any bound color target. It might be unused by this pass but that doesn't mean we can just clear it. (e.g. in case of overlay cameras + depth priming)
@@ -92,15 +93,6 @@ namespace UnityEngine.Rendering.Universal.Internal
             }
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
-        }
-
-        /// <inheritdoc/>
-        public override void OnCameraCleanup(CommandBuffer cmd)
-        {
-            if (cmd == null)
-                throw new ArgumentNullException("cmd");
-
-            depthAttachmentHandle = RenderTargetHandle.CameraTarget;
         }
     }
 }
