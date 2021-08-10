@@ -96,6 +96,7 @@ namespace UnityEngine.Rendering.Universal
         RenderTargetHandle m_DepthTexture;
         RenderTargetHandle m_NormalsTexture;
         RenderTargetHandle m_OpaqueColor;
+        RenderTargetHandle m_MotionVectorTexture;
         // For tiled-deferred shading.
         RenderTargetHandle m_DepthInfoTexture;
         RenderTargetHandle m_TileDepthInfoTexture;
@@ -265,6 +266,7 @@ namespace UnityEngine.Rendering.Universal
             m_DepthTexture.Init("_CameraDepthTexture");
             m_NormalsTexture.Init("_CameraNormalsTexture");
             m_OpaqueColor.Init("_CameraOpaqueTexture");
+            m_MotionVectorTexture.Init("_MotionVectorTexture");
             m_DepthInfoTexture.Init("_DepthInfoTexture");
             m_TileDepthInfoTexture.Init("_TileDepthInfoTexture");
 
@@ -731,7 +733,7 @@ namespace UnityEngine.Rendering.Universal
                 SupportedRenderingFeatures.active.motionVectors = true; // hack for enabling UI
 
                 var data = MotionVectorRendering.instance.GetMotionDataForCamera(camera, cameraData);
-                m_MotionVectorPass.Setup(data);
+                m_MotionVectorPass.Setup(m_MotionVectorTexture, data);
                 EnqueuePass(m_MotionVectorPass);
             }
 
