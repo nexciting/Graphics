@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering.Universal.Internal;
 
 namespace UnityEngine.Rendering.Universal
@@ -97,7 +98,8 @@ namespace UnityEngine.Rendering.Universal
         RTHandle m_DepthTexture;
         RTHandle m_NormalsTexture;
         RTHandle m_OpaqueColor;
-        RTHandle m_MotionVectorTexture;
+        RTHandle m_MotionVectorColor;
+        RTHandle m_MotionVectorDepth;
         // For tiled-deferred shading.
         RTHandle m_DepthInfoTexture;
         RTHandle m_TileDepthInfoTexture;
@@ -267,7 +269,6 @@ namespace UnityEngine.Rendering.Universal
             m_DepthTextureAlloc = false;
             m_NormalsTexture = RTHandles.Alloc(new RenderTargetIdentifier(Shader.PropertyToID("_CameraNormalsTexture"), 0, CubemapFace.Unknown, -1), "_CameraNormalsTexture");
             m_OpaqueColor = RTHandles.Alloc(new RenderTargetIdentifier(Shader.PropertyToID("_CameraOpaqueTexture"), 0, CubemapFace.Unknown, -1), "_CameraOpaqueTexture");
-            m_MotionVectorTexture = RTHandles.Alloc(new RenderTargetIdentifier(Shader.PropertyToID("_MotionVectorTexture"), 0, CubemapFace.Unknown, -1), "_MotionVectorTexture");
             m_DepthInfoTexture = RTHandles.Alloc(new RenderTargetIdentifier(Shader.PropertyToID("_DepthInfoTexture"), 0, CubemapFace.Unknown, -1), "_DepthInfoTexture");
             m_TileDepthInfoTexture = RTHandles.Alloc(new RenderTargetIdentifier(Shader.PropertyToID("_TileDepthInfoTexture"), 0, CubemapFace.Unknown, -1), "_TileDepthInfoTexture");
 
@@ -302,7 +303,8 @@ namespace UnityEngine.Rendering.Universal
             m_DepthTexture?.Release();
             m_NormalsTexture?.Release();
             m_OpaqueColor?.Release();
-            m_MotionVectorTexture?.Release();
+            m_MotionVectorColor?.Release();
+            m_MotionVectorDepth?.Release();
             m_DepthInfoTexture?.Release();
             m_TileDepthInfoTexture?.Release();
 
@@ -755,8 +757,25 @@ namespace UnityEngine.Rendering.Universal
             {
                 SupportedRenderingFeatures.active.motionVectors = true; // hack for enabling UI
 
+                var colorDescriptor = cameraTargetDescriptor;
+                colorDescriptor.graphicsFormat = MotionVectorRenderPass.m_TargetFormat;
+                colorDescriptor.depthBufferBits = (int)DepthBits.None;
+                if (RTHandleNeedsRealloc(m_MotionVectorColor, colorDescriptor, false))
+                {
+                    m_MotionVectorColor?.Release();
+                    m_MotionVectorColor = RTHandles.Alloc(colorDescriptor, filterMode: FilterMode.Point, wrapMode: TextureWrapMode.Clamp, name: "_MotionVectorTexture");
+                }
+
+                var depthDescriptor = cameraTargetDescriptor;
+                depthDescriptor.graphicsFormat = GraphicsFormat.None;
+                if (RTHandleNeedsRealloc(m_MotionVectorDepth, depthDescriptor, false))
+                {
+                    m_MotionVectorDepth?.Release();
+                    m_MotionVectorDepth = RTHandles.Alloc(depthDescriptor, filterMode: FilterMode.Point, wrapMode: TextureWrapMode.Clamp, name: "_MotionVectorDepthTexture");
+                }
+
                 var data = MotionVectorRendering.instance.GetMotionDataForCamera(camera, cameraData);
-                m_MotionVectorPass.Setup(m_MotionVectorTexture, data);
+                m_MotionVectorPass.Setup(m_MotionVectorColor, m_MotionVectorDepth, data);
                 EnqueuePass(m_MotionVectorPass);
             }
 
