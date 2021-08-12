@@ -21,27 +21,12 @@ namespace UnityEngine.Rendering.Universal.Internal
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
             RTHandle outputTex;
-            RenderTextureDescriptor desc;
-
             if (m_PassIndex == 0 && m_DeferredLights.HasTileDepthRangeExtraPass())
-            {
-                int alignment = 1 << DeferredConfig.kTileDepthInfoIntermediateLevel;
-                int depthInfoWidth = (m_DeferredLights.RenderWidth + alignment - 1) >> DeferredConfig.kTileDepthInfoIntermediateLevel;
-                int depthInfoHeight = (m_DeferredLights.RenderHeight + alignment - 1) >> DeferredConfig.kTileDepthInfoIntermediateLevel;
-
                 outputTex = m_DeferredLights.DepthInfoTexture;
-                desc = new RenderTextureDescriptor(depthInfoWidth, depthInfoHeight, UnityEngine.Experimental.Rendering.GraphicsFormat.R32_UInt, 0);
-            }
             else
-            {
-                int tileDepthRangeWidth = m_DeferredLights.GetTiler(0).TileXCount;
-                int tileDepthRangeHeight = m_DeferredLights.GetTiler(0).TileYCount;
-
                 outputTex = m_DeferredLights.TileDepthInfoTexture;
-                desc = new RenderTextureDescriptor(tileDepthRangeWidth, tileDepthRangeHeight, UnityEngine.Experimental.Rendering.GraphicsFormat.R32_UInt, 0);
-            }
-            cmd.GetTemporaryRT(Shader.PropertyToID(outputTex.name), desc, FilterMode.Point);
-            base.ConfigureTarget(outputTex.nameID);
+            cmd.SetGlobalTexture(outputTex.name, outputTex.nameID);
+            base.ConfigureTarget(outputTex);
         }
 
         /// <inheritdoc/>
@@ -51,16 +36,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                 m_DeferredLights.ExecuteTileDepthInfoPass(context, ref renderingData);
             else
                 m_DeferredLights.ExecuteDownsampleBitmaskPass(context, ref renderingData);
-        }
-
-        /// <inheritdoc/>
-        public override void OnCameraCleanup(CommandBuffer cmd)
-        {
-            if (cmd == null)
-                throw new ArgumentNullException("cmd");
-
-            cmd.ReleaseTemporaryRT(Shader.PropertyToID(m_DeferredLights.TileDepthInfoTexture.name));
-            m_DeferredLights.TileDepthInfoTexture = null;
         }
     }
 }

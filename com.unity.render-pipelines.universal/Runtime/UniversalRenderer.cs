@@ -265,8 +265,6 @@ namespace UnityEngine.Rendering.Universal
             // Samples (MSAA) depend on camera and pipeline
             m_ColorBufferSystem = new RenderTargetBufferSystem("_CameraColorAttachment");
             m_OpaqueColor = RTHandles.Alloc(new RenderTargetIdentifier(Shader.PropertyToID("_CameraOpaqueTexture"), 0, CubemapFace.Unknown, -1), "_CameraOpaqueTexture");
-            m_DepthInfoTexture = RTHandles.Alloc(new RenderTargetIdentifier(Shader.PropertyToID("_DepthInfoTexture"), 0, CubemapFace.Unknown, -1), "_DepthInfoTexture");
-            m_TileDepthInfoTexture = RTHandles.Alloc(new RenderTargetIdentifier(Shader.PropertyToID("_TileDepthInfoTexture"), 0, CubemapFace.Unknown, -1), "_TileDepthInfoTexture");
 
             supportedRenderingFeatures = new RenderingFeatures()
             {
@@ -981,6 +979,31 @@ namespace UnityEngine.Rendering.Universal
 
         void EnqueueDeferred(ref RenderingData renderingData, bool hasDepthPrepass, bool hasNormalPrepass, bool applyMainShadow, bool applyAdditionalShadow)
         {
+            if (m_DeferredLights.HasTileLights())
+            {
+                int alignment = 1 << DeferredConfig.kTileDepthInfoIntermediateLevel;
+                int depthInfoWidth = (m_DeferredLights.RenderWidth + alignment - 1) >> DeferredConfig.kTileDepthInfoIntermediateLevel;
+                int depthInfoHeight = (m_DeferredLights.RenderHeight + alignment - 1) >> DeferredConfig.kTileDepthInfoIntermediateLevel;
+                var desc = new RenderTextureDescriptor(depthInfoWidth, depthInfoHeight, UnityEngine.Experimental.Rendering.GraphicsFormat.R32_UInt, 0);
+                if (RTHandleNeedsRealloc(m_DepthInfoTexture, desc, false))
+                {
+                    m_DepthInfoTexture?.Release();
+                    m_DepthInfoTexture = RTHandles.Alloc(desc, filterMode: FilterMode.Point, wrapMode: TextureWrapMode.Clamp, name: "_DepthInfoTexture");
+                }
+            }
+
+            if (m_DeferredLights.HasTileDepthRangeExtraPass())
+            {
+                int tileDepthRangeWidth = m_DeferredLights.GetTiler(0).TileXCount;
+                int tileDepthRangeHeight = m_DeferredLights.GetTiler(0).TileYCount;
+                var desc = new RenderTextureDescriptor(tileDepthRangeWidth, tileDepthRangeHeight, UnityEngine.Experimental.Rendering.GraphicsFormat.R32_UInt, 0);
+                if (RTHandleNeedsRealloc(m_TileDepthInfoTexture, desc, false))
+                {
+                    m_TileDepthInfoTexture?.Release();
+                    m_TileDepthInfoTexture = RTHandles.Alloc(desc, filterMode: FilterMode.Point, wrapMode: TextureWrapMode.Clamp, name: "_TileDepthInfoTexture");
+                }
+            }
+
             m_DeferredLights.Setup(
                 ref renderingData,
                 applyAdditionalShadow ? m_AdditionalLightsShadowCasterPass : null,
