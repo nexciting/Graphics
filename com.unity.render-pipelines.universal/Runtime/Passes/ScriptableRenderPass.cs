@@ -459,11 +459,9 @@ namespace UnityEngine.Rendering.Universal
                 Debug.LogError("Trying to set " + nonNullColorBuffers + " renderTargets, which is more than the maximum supported:" + SystemInfo.supportedRenderTargetCount);
 
             m_ColorAttachments = colorAttachments;
+            if (m_ColorAttachmentIds.Length != m_ColorAttachments.Length)
+                m_ColorAttachmentIds = new RenderTargetIdentifier[m_ColorAttachments.Length];
             for (var i = 0; i < m_ColorAttachmentIds.Length; ++i)
-            {
-                m_ColorAttachmentIds[i] = 0;
-            }
-            for (var i = 0; i < m_ColorAttachments.Length; ++i)
             {
                 m_ColorAttachmentIds[i] = colorAttachments[i].nameID;
             }

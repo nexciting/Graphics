@@ -51,6 +51,36 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_RenderStateBlocks[3] = m_RenderStateBlocks[0];
         }
 
+        public void Dispose()
+        {
+            if (m_DeferredLights.GbufferAttachments != null)
+            {
+                foreach (var attachment in m_DeferredLights.GbufferAttachments)
+                    attachment?.Release();
+            }
+        }
+
+        static bool RTHandleNeedsRealloc(RTHandle handle, in RenderTextureDescriptor descriptor, bool scaled)
+        {
+            if (handle == null || handle.rt == null)
+                return true;
+            if (handle.useScaling != scaled)
+                return true;
+            if (!scaled && (handle.rt.width != descriptor.width || handle.rt.height != descriptor.height))
+                return true;
+            return
+                handle.rt.descriptor.depthBufferBits != descriptor.depthBufferBits ||
+                (handle.rt.descriptor.depthBufferBits == (int)DepthBits.None && handle.rt.descriptor.graphicsFormat != descriptor.graphicsFormat) ||
+                handle.rt.descriptor.dimension != descriptor.dimension ||
+                handle.rt.descriptor.enableRandomWrite != descriptor.enableRandomWrite ||
+                handle.rt.descriptor.useMipMap != descriptor.useMipMap ||
+                handle.rt.descriptor.autoGenerateMips != descriptor.autoGenerateMips ||
+                handle.rt.descriptor.msaaSamples != descriptor.msaaSamples ||
+                handle.rt.descriptor.bindMS != descriptor.bindMS ||
+                handle.rt.descriptor.useDynamicScale != descriptor.useDynamicScale ||
+                handle.rt.descriptor.memoryless != descriptor.memoryless;
+        }
+
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
             RTHandle[] gbufferAttachments = m_DeferredLights.GbufferAttachments;
@@ -77,14 +107,19 @@ namespace UnityEngine.Rendering.Universal.Internal
                     gbufferSlice.depthBufferBits = 0; // make sure no depth surface is actually created
                     gbufferSlice.stencilFormat = GraphicsFormat.None;
                     gbufferSlice.graphicsFormat = m_DeferredLights.GetGBufferFormat(i);
-                    cmd.GetTemporaryRT(Shader.PropertyToID(m_DeferredLights.GbufferAttachments[i].name), gbufferSlice);
+                    if (RTHandleNeedsRealloc(m_DeferredLights.GbufferAttachments[i], gbufferSlice, false))
+                    {
+                        m_DeferredLights.GbufferAttachments[i]?.Release();
+                        m_DeferredLights.GbufferAttachments[i] = RTHandles.Alloc(gbufferSlice, filterMode: FilterMode.Point, wrapMode: TextureWrapMode.Clamp, name: DeferredLights.k_GBufferNames[i]);
+                    }
+                    cmd.SetGlobalTexture(m_DeferredLights.GbufferAttachments[i].name, m_DeferredLights.GbufferAttachments[i]);
                 }
             }
 
-            ConfigureTarget(m_DeferredLights.GbufferAttachmentIdentifiers, m_DeferredLights.DepthAttachmentIdentifier, m_DeferredLights.GbufferFormats);
+            ConfigureTarget(m_DeferredLights.GbufferAttachments, m_DeferredLights.DepthAttachment, m_DeferredLights.GbufferFormats);
 
-            // We must explicitely specify we don't want any clear to avoid unwanted side-effects.
-            // ScriptableRenderer will implicitely force a clear the first time the camera color/depth targets are bound.
+            // We must explicitly specify we don't want any clear to avoid unwanted side-effects.
+            // ScriptableRenderer will implicitly force a clear the first time the camera color/depth targets are bound.
             ConfigureClear(ClearFlag.None, Color.black);
         }
 
@@ -131,20 +166,6 @@ namespace UnityEngine.Rendering.Universal.Internal
 
             context.ExecuteCommandBuffer(gbufferCommands);
             CommandBufferPool.Release(gbufferCommands);
-        }
-
-        public override void OnCameraCleanup(CommandBuffer cmd)
-        {
-            for (int i = 0; i < m_DeferredLights.GbufferAttachments.Length; ++i)
-            {
-                if (i == m_DeferredLights.GBufferLightingIndex)
-                    continue;
-
-                if (i == m_DeferredLights.GBufferNormalSmoothnessIndex && m_DeferredLights.HasNormalPrepass)
-                    continue;
-
-                cmd.ReleaseTemporaryRT(Shader.PropertyToID(m_DeferredLights.GbufferAttachments[i].name));
-            }
         }
     }
 }

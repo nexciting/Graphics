@@ -243,7 +243,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             public int instanceCount;
         }
 
-        static readonly string[] k_GBufferNames = new string[]
+        internal static readonly string[] k_GBufferNames = new string[]
         {
             "_GBuffer0",
             "_GBuffer1",
