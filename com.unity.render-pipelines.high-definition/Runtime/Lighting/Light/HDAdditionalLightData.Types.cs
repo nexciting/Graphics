@@ -41,8 +41,10 @@ namespace UnityEngine.Rendering.HighDefinition
         /// <summary>Rectangle shape.</summary>
         Rectangle,
         /// <summary>Tube shape. Runtime only</summary>
+        [InspectorName("Tube (Realtime only)")]
         Tube,
         /// <summary>Disc shape. Baking only.</summary>
+        [InspectorName("Disc (Baked only)")]
         Disc,
         // Sphere,
     };
