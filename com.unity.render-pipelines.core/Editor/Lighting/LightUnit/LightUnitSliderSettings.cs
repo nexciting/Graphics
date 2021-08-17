@@ -8,11 +8,30 @@ namespace UnityEditor.Rendering
     /// </summary>
     public struct LightUnitSliderUIDescriptor
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="valueRanges">The values</param>
+        /// <param name="sliderDistribution">The distribution</param>
+        /// <param name="cautionTooltip">The caution tooltip</param>
+        /// <param name="unitName">The name of the units</param>
+        /// <param name="hasMarkers">If has marker</param>
+        /// <param name="clampValue">The value to clamp</param>
         public LightUnitSliderUIDescriptor(LightUnitSliderUIRange[] valueRanges, float[] sliderDistribution,
                                            string cautionTooltip, string unitName, bool hasMarkers = true, bool clampValue = false)
             : this(valueRanges, sliderDistribution, cautionTooltip, cautionTooltip, unitName, hasMarkers, clampValue)
         {}
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="valueRanges">The values</param>
+        /// <param name="sliderDistribution">The distribution</param>
+        /// <param name="belowRangeTooltip">The tooltip if the value is below the range</param>
+        /// <param name="aboveRangeTooltip">The tooltip if the value is above the range</param>
+        /// <param name="unitName">The name of the units</param>
+        /// <param name="hasMarkers">If has marker</param>
+        /// <param name="clampValue">The value to clamp</param>
         public LightUnitSliderUIDescriptor(LightUnitSliderUIRange[] valueRanges, float[] sliderDistribution, string belowRangeTooltip,
                                            string aboveRangeTooltip, string unitName, bool hasMarkers = true, bool clampValue = false)
         {
@@ -30,13 +49,38 @@ namespace UnityEditor.Rendering
             );
         }
 
+        /// <summary>
+        /// The array of the distribution
+        /// </summary>
         public readonly float[] sliderDistribution;
+        /// <summary>
+        /// The value ranges of the UI
+        /// </summary>
         public readonly LightUnitSliderUIRange[] valueRanges;
+        /// <summary>
+        /// The ranges (min, max)
+        /// </summary>
         public readonly Vector2 sliderRange;
+
+        /// <summary>
+        /// Tooltip shown when the value is bellow the range
+        /// </summary>
         public readonly string belowRangeTooltip;
+        /// <summary>
+        /// Tooltip shown when the value is above the range
+        /// </summary>
         public readonly string aboveRangeTooltip;
+        /// <summary>
+        /// The name of the unit
+        /// </summary>
         public readonly string unitName;
+        /// <summary>
+        /// If has marker or not
+        /// </summary>
         public readonly bool hasMarkers;
+        /// <summary>
+        /// The value to clamp the setting
+        /// </summary>
         public readonly bool clampValue;
     }
 
@@ -113,7 +157,7 @@ namespace UnityEditor.Rendering
     public static class LightUnitSliderDescriptors
     {
         // Temperature
-        public static LightUnitSliderUIDescriptor TemperatureDescriptor = new LightUnitSliderUIDescriptor(
+        internal static LightUnitSliderUIDescriptor TemperatureDescriptor = new LightUnitSliderUIDescriptor(
             LightUnitValueRanges.KelvinValueTableNew,
             LightUnitSliderDistributions.ExposureDistribution,
             LightUnitTooltips.k_TemperatureCaution,
