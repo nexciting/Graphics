@@ -335,9 +335,12 @@ namespace UnityEditor.Rendering
         internal void OnInternalInspectorGUI()
         {
             serializedObject.Update();
-            TopRowFields();
-            OnInspectorGUI();
-            EditorGUILayout.Space();
+            using (new EditorGUILayout.VerticalScope())
+            {
+                TopRowFields();
+                OnInspectorGUI();
+                EditorGUILayout.Space();
+            }
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -721,9 +724,13 @@ namespace UnityEditor.Rendering
                 {
                     editor.HandleDecorators(property, label);
 
+                    int relativeIndentation = editor.HandleRelativeIndentation(property);
+                    if (relativeIndentation != 0)
+                        indentScope = new IndentLevelScope(relativeIndentation * 15);
+
                     if (!haveCustomOverrideCheckbox)
                     {
-                        EditorGUILayout.BeginHorizontal(new GUIStyle() { padding = new RectOffset(editor.HandleRelativeIndentation(property) * 15, 0, 0, 0)});
+                        EditorGUILayout.BeginHorizontal();
                         editor.DrawOverrideCheckbox(property);
 
                         disabledScope = new EditorGUI.DisabledScope(!property.overrideState.boolValue);
