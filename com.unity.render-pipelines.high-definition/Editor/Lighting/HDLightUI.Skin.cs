@@ -9,12 +9,8 @@ namespace UnityEditor.Rendering.HighDefinition
         sealed class Styles
         {
             // Headers
-            public readonly GUIContent generalHeader = EditorGUIUtility.TrTextContent("General");
-            public readonly GUIContent shapeHeader = EditorGUIUtility.TrTextContent("Shape");
             public readonly GUIContent celestialBodyHeader = EditorGUIUtility.TrTextContent("Celestial Body");
-            public readonly GUIContent emissionHeader = EditorGUIUtility.TrTextContent("Emission");
             public readonly GUIContent volumetricHeader = EditorGUIUtility.TrTextContent("Volumetrics");
-            public readonly GUIContent shadowHeader = EditorGUIUtility.TrTextContent("Shadows");
             public readonly GUIContent shadowMapSubHeader = EditorGUIUtility.TrTextContent("Shadow Map");
             public readonly GUIContent contactShadowsSubHeader = EditorGUIUtility.TrTextContent("Contact Shadows");
             public readonly GUIContent bakedShadowsSubHeader = EditorGUIUtility.TrTextContent("Baked Shadows");
@@ -47,9 +43,6 @@ namespace UnityEditor.Rendering.HighDefinition
             public readonly GUIContent areaIntensity = EditorGUIUtility.TrTextContent("Intensity (Lumen)", "Luminous power of the Light in Lumen.");
             public readonly GUIContent lightIntensity = EditorGUIUtility.TrTextContent("Intensity", "Sets the strength of the Light. Use the drop-down to select the light units to use.");
 
-            // in casse that you want to keep the indentation but have nothing to write
-            public readonly GUIContent empty = EditorGUIUtility.TrTextContent(" ");
-
             public readonly GUIContent lightRadius = EditorGUIUtility.TrTextContent("Radius", "Sets the radius of the light source. This affects the falloff of diffuse lighting, the spread of the specular highlight, and the softness of Ray Traced shadows.");
             public readonly GUIContent affectDiffuse = EditorGUIUtility.TrTextContent("Affect Diffuse", "When disabled, HDRP does not calculate diffuse lighting for this Light. Does not increase performance as HDRP still calculates the diffuse lighting.");
             public readonly GUIContent affectSpecular = EditorGUIUtility.TrTextContent("Affect Specular", "When disabled, HDRP does not calculate specular lighting for this Light. Does not increase performance as HDRP still calculates the specular lighting.");
@@ -75,7 +68,6 @@ namespace UnityEditor.Rendering.HighDefinition
             public readonly GUIContent areaLightEmissiveMeshMotionVector = EditorGUIUtility.TrTextContent("Motion Vectors", "Specify wether the generated Mesh renders 'Per Object Motion', 'Camera Motion' or 'No Motion' vectors to the Camera Motion Vector Texture.");
             public readonly GUIContent areaLightEmissiveMeshSameLayer = EditorGUIUtility.TrTextContent("Same Layer", "If checked, use the same Layer than the Light one.");
             public readonly GUIContent areaLightEmissiveMeshCustomLayer = EditorGUIUtility.TrTextContent("Custom Layer", "Specify on which layer the generated Mesh live.");
-            public readonly GUIContent lightLayer = EditorGUIUtility.TrTextContent("Light Layer", "Specifies the current Light Layers that the Light affects. This Light illuminates corresponding Renderers with the same Light Layer flags.");
 
             public readonly GUIContent interactsWithSky = EditorGUIUtility.TrTextContent("Affect Physically Based Sky", "Check this option to make the light and the Physically Based sky affect one another.");
             public readonly GUIContent angularDiameter = EditorGUIUtility.TrTextContent("Angular Diameter", "Angular diameter of the emissive celestial body represented by the light as seen from the camera (in degrees). Used to render the sun/moon disk.");

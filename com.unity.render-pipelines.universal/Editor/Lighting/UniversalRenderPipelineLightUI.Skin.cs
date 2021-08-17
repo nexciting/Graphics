@@ -7,12 +7,7 @@ namespace UnityEditor.Rendering.Universal
     {
         static class Styles
         {
-            public static readonly GUIContent generalHeader = new GUIContent("General");
-            public static readonly GUIContent shapeHeader = new GUIContent("Shape");
-            public static readonly GUIContent renderingHeader = new GUIContent("Rendering");
-            public static readonly GUIContent emissionHeader = new GUIContent("Emission");
-            public static readonly GUIContent shadowHeader = new GUIContent("Shadows");
-            public static readonly GUIContent lightCookieHeader = new GUIContent("Light Cookie");
+            public static readonly GUIContent lightCookieHeader = EditorGUIUtility.TrTextContent("Light Cookie");
 
             public static readonly GUIContent Type = EditorGUIUtility.TrTextContent("Type", "Specifies the current type of light. Possible types are Directional, Spot, Point, and Area lights.");
 
@@ -61,7 +56,6 @@ namespace UnityEditor.Rendering.Universal
                 EditorGUIUtility.TrTextContent("Use settings from Render Pipeline Asset")
             };
 
-            public static readonly GUIContent LightLayer = EditorGUIUtility.TrTextContent("Light Layer", "Specifies the current Light Layers that the Light affects. This Light illuminates corresponding Renderers with the same Light Layer flags.");
             public static readonly GUIContent customShadowLayers = EditorGUIUtility.TrTextContent("Custom Shadow Layers", "When enabled, you can use the Layer property below to specify the layers for shadows seperately to lighting. When disabled, the Light Layer property in the General section specifies the layers for both lighting and for shadows.");
             public static readonly GUIContent ShadowLayer = EditorGUIUtility.TrTextContent("Layer", "Specifies the light layer to use for shadows.");
 

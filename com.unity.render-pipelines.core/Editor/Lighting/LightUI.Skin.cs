@@ -7,8 +7,19 @@ namespace UnityEditor.Rendering
     /// </summary>
     public partial class LightUI
     {
-        static class Styles
+        /// <summary>
+        /// Styles
+        /// </summary>
+        public static class Styles
         {
+            public static readonly GUIContent generalHeader = EditorGUIUtility.TrTextContent("General");
+            public static readonly GUIContent shapeHeader = EditorGUIUtility.TrTextContent("Shape");
+            public static readonly GUIContent renderingHeader = EditorGUIUtility.TrTextContent("Rendering");
+            public static readonly GUIContent emissionHeader = EditorGUIUtility.TrTextContent("Emission");
+            public static readonly GUIContent shadowHeader = EditorGUIUtility.TrTextContent("Shadows");
+
+            public static readonly GUIContent lightLayer = EditorGUIUtility.TrTextContent("Light Layer", "Specifies the current Light Layers that the Light affects. This Light illuminates corresponding Renderers with the same Light Layer flags.");
+
             // in casse that you want to keep the indentation but have nothing to write
             public static readonly GUIContent empty = EditorGUIUtility.TrTextContent(" ");
 
