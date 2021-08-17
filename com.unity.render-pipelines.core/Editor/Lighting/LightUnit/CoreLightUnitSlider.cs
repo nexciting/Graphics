@@ -29,16 +29,31 @@ namespace UnityEditor.Rendering
 
         protected readonly CoreLightUnitSliderUIDescriptor m_Descriptor;
 
-        public CoreLightUnitSlider(CoreLightUnitSliderUIDescriptor descriptor)
+
+        /// <summary>
+        /// Constructs the slider
+        /// </summary>
+        /// <param name="descriptor"><see cref="CoreLightUnitSliderUIDescriptor"/> with a descriptor for the slider</param>
+        protected CoreLightUnitSlider(CoreLightUnitSliderUIDescriptor descriptor)
         {
             m_Descriptor = descriptor;
         }
 
+        /// <summary>
+        /// Updates the <see cref="SerializedObject"/> of this slider
+        /// </summary>
+        /// <param name="serialized"><see cref="SerializedObject"/> from a <see cref="Light"/></param>
         public void SetSerializedObject(SerializedObject serialized)
         {
             m_SerializedObject = serialized;
         }
 
+        /// <summary>
+        /// Draws the slider
+        /// </summary>
+        /// <param name="rect"><see cref="Rect"/>The rect of the slider</param>
+        /// <param name="value"><see cref="SerializedProperty"/>The current property of the slider from the <see cref="Light"/></param>
+        /// <param name="floatValue">The current value</param>
         public virtual void Draw(Rect rect, SerializedProperty value, ref float floatValue)
         {
             BuildRects(rect, out var sliderRect, out var iconRect);
@@ -251,10 +266,7 @@ namespace UnityEditor.Rendering
         }
     }
 
-    /// <summary>
-    /// Formats the provided descriptor into a temperature unit slider with contextual slider markers, tooltips, and icons.
-    /// </summary>
-    public class TemperatureSlider : CoreLightUnitSlider
+    class TemperatureSlider : CoreLightUnitSlider
     {
         private Vector3 m_ExponentialConstraints;
 
@@ -362,6 +374,9 @@ namespace UnityEditor.Rendering
         }
     }
 
+    /// <summary>
+    /// Drawer helper for <see cref="TemperatureSlider"/>
+    /// </summary>
     public static class TemperatureSliderSliderUIDrawer
     {
         // Kelvin is not classified internally as a light unit so we handle it independently as well.

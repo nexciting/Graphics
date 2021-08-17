@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace UnityEditor.Rendering
 {
+    /// <summary>
+    /// Descriptors for Light Units
+    /// </summary>
     public struct CoreLightUnitSliderUIDescriptor
     {
         public CoreLightUnitSliderUIDescriptor(CoreLightUnitSliderUIRange[] valueRanges, float[] sliderDistribution,
@@ -37,13 +40,29 @@ namespace UnityEditor.Rendering
         public readonly bool clampValue;
     }
 
+    /// <summary>
+    /// Range for Light Unit Slider
+    /// </summary>
     public struct CoreLightUnitSliderUIRange
     {
+        /// <summary>
+        /// Constructs this range
+        /// </summary>
+        /// <param name="icon"><see cref="Texture2D"/>The icon</param>
+        /// <param name="tooltip">The tooltip</param>
+        /// <param name="value"><see cref="Vector2"/>The range of this slider</param>
         public CoreLightUnitSliderUIRange(Texture2D icon, string tooltip, Vector2 value)
         // If no preset value provided, then by default it is the average of the value range.
             : this(icon, tooltip, value, 0.5f * (value.x + value.y))
         {}
 
+        /// <summary>
+        /// Constructs this range
+        /// </summary>
+        /// <param name="icon"><see cref="Texture2D"/>The icon</param>
+        /// <param name="tooltip">The tooltip</param>
+        /// <param name="value"><see cref="Vector2"/>The range of this slider</param>
+        /// <param name="presetValue">Preset values are arbitrarily chosen by artist</param>
         public CoreLightUnitSliderUIRange(Texture2D icon, string tooltip, Vector2 value, float presetValue)
         {
             this.content = new GUIContent(icon, tooltip);
@@ -56,19 +75,41 @@ namespace UnityEditor.Rendering
             this.presetValue = presetValue;
         }
 
+        /// <summary>
+        /// Creates one range with given tooltip and max range
+        /// </summary>
+        /// <param name="icon"><see cref="Texture2D"/>The icon</param>
+        /// <param name="tooltip">The tooltip</param>
+        /// <param name="value"><see cref="Vector2"/>The range of this slider</param>
+        /// <param name="presetValue">Preset values are arbitrarily chosen by artist</param>
         public static CoreLightUnitSliderUIRange CautionRange(string tooltip, float value) => new CoreLightUnitSliderUIRange
         {
             // Load the buildin caution icon with provided tooltip.
-            content = new GUIContent(EditorGUIUtility.TrIconContent("console.warnicon").image, tooltip),
+            content = EditorGUIUtility.TrIconContent(CoreEditorStyles.iconWarn, tooltip),
             value = new Vector2(-1, value),
             presetValue = -1
         };
 
+        /// <summary>
+        /// The label
+        /// </summary>
         public GUIContent content;
+
+        /// <summary>
+        /// The range
+        /// </summary>
         public Vector2    value;
+
+        /// <summary>
+        /// The preset value
+        /// </summary>
         public float      presetValue;
     }
 
+
+    /// <summary>
+    /// Helper class to store the <see cref="CoreLightUnitSliderUIDescriptor"/>
+    /// </summary>
     public static class CoreLightUnitSliderDescriptors
     {
         // Temperature
@@ -95,6 +136,9 @@ namespace UnityEditor.Rendering
             };
         }
 
+        /// <summary>
+        /// Light Unit Icons
+        /// </summary>
         public static class CoreLightUnitIcon
         {
             // Note: We do not use the editor resource loading mechanism for light unit icons because we need to skin the icon correctly for the editor theme.
