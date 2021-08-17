@@ -36,35 +36,35 @@ namespace UnityEditor.Rendering.Universal
                 case LightType.Spot:
                     using (new Handles.DrawingScope(Matrix4x4.TRS(light.transform.position, light.transform.rotation, Vector3.one)))
                     {
-                        CoreLightEditorUtilities.DrawSpotLightGizmo(light);
+                        UnityEditor.Rendering.LightEditorUtilities.DrawSpotLightGizmo(light);
                     }
                     break;
 
                 case LightType.Point:
                     using (new Handles.DrawingScope(Matrix4x4.TRS(light.transform.position, Quaternion.identity, Vector3.one)))
                     {
-                        CoreLightEditorUtilities.DrawPointLightGizmo(light);
+                        UnityEditor.Rendering.LightEditorUtilities.DrawPointLightGizmo(light);
                     }
                     break;
 
                 case LightType.Rectangle:
                     using (new Handles.DrawingScope(Matrix4x4.TRS(light.transform.position, light.transform.rotation, Vector3.one)))
                     {
-                        CoreLightEditorUtilities.DrawRectangleLightGizmo(light);
+                        UnityEditor.Rendering.LightEditorUtilities.DrawRectangleLightGizmo(light);
                     }
                     break;
 
                 case LightType.Disc:
                     using (new Handles.DrawingScope(Matrix4x4.TRS(light.transform.position, light.transform.rotation, Vector3.one)))
                     {
-                        CoreLightEditorUtilities.DrawDiscLightGizmo(light);
+                        UnityEditor.Rendering.LightEditorUtilities.DrawDiscLightGizmo(light);
                     }
                     break;
 
                 case LightType.Directional:
                     using (new Handles.DrawingScope(Matrix4x4.TRS(light.transform.position, light.transform.rotation, Vector3.one)))
                     {
-                        CoreLightEditorUtilities.DrawDirectionalLightGizmo(light);
+                        UnityEditor.Rendering.LightEditorUtilities.DrawDirectionalLightGizmo(light);
                     }
                     break;
 

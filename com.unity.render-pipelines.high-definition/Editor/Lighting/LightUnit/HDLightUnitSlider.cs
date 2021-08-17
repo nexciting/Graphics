@@ -9,7 +9,7 @@ namespace UnityEditor.Rendering.HighDefinition
     /// <summary>
     /// Formats the provided descriptor into a piece-wise linear slider with contextual slider markers, tooltips, and icons.
     /// </summary>
-    class PiecewiseLightUnitSlider : LightUnitSlider
+    class HDPiecewiseLightUnitSlider : LightUnitSlider
     {
         struct Piece
         {
@@ -39,7 +39,7 @@ namespace UnityEditor.Rendering.HighDefinition
 
         // Ideally we want a continuous, monotonically increasing function, but this is useful as we can easily fit a
         // distribution to a set of (huge) value ranges onto a slider.
-        public PiecewiseLightUnitSlider(LightUnitSliderUIDescriptor descriptor) : base(descriptor)
+        public HDPiecewiseLightUnitSlider(LightUnitSliderUIDescriptor descriptor) : base(descriptor)
         {
             // Sort the ranges into ascending order
             var sortedRanges = m_Descriptor.valueRanges.OrderBy(x => x.value.x).ToArray();
@@ -132,9 +132,9 @@ namespace UnityEditor.Rendering.HighDefinition
     /// <summary>
     /// Formats the provided descriptor into a punctual light unit slider with contextual slider markers, tooltips, and icons.
     /// </summary>
-    class PunctualLightUnitSlider : PiecewiseLightUnitSlider
+    class HDPunctualLightUnitSlider : PiecewiseLightUnitSlider
     {
-        public PunctualLightUnitSlider(LightUnitSliderUIDescriptor descriptor) : base(descriptor) {}
+        public HDPunctualLightUnitSlider(LightUnitSliderUIDescriptor descriptor) : base(descriptor) {}
 
         private SerializedHDLight m_Light;
         private Editor m_Editor;
@@ -220,13 +220,13 @@ namespace UnityEditor.Rendering.HighDefinition
         }
     }
 
-    internal class LightUnitSliderUIDrawer
+    internal class HDLightUnitSliderUIDrawer
     {
         static PiecewiseLightUnitSlider k_DirectionalLightUnitSlider;
         static PunctualLightUnitSlider  k_PunctualLightUnitSlider;
         static PiecewiseLightUnitSlider k_ExposureSlider;
 
-        static LightUnitSliderUIDrawer()
+        static HDLightUnitSliderUIDrawer()
         {
             // Maintain a unique slider for directional/lux.
             k_DirectionalLightUnitSlider = new PiecewiseLightUnitSlider(LightUnitSliderDescriptors.LuxDescriptor);

@@ -8,7 +8,7 @@ namespace UnityEditor.Rendering.HighDefinition
     partial class HDLightUI
     {
         #region HDRPOnlyPreviouslyInCoreThatNeedRewrite
-        // All this region was in CoreLightEditorUtilities
+        // All this region was in LightEditorUtilities
         // We must change the light gizmo to matches Universal ones
         // This was public API but we do not want it public as it need to be rewritten
 
@@ -19,7 +19,7 @@ namespace UnityEditor.Rendering.HighDefinition
             return (QualitySettings.activeColorSpace == ColorSpace.Linear) ? color.linear : color;
         }
 
-        //copy of CoreLightEditorUtilities
+        //copy of LightEditorUtilities
         static Color GetLightBehindObjectWireframeColor(Color wireframeColor)
         {
             Color color = wireframeColor;
@@ -27,7 +27,7 @@ namespace UnityEditor.Rendering.HighDefinition
             return RemapLightColor(UnityEngine.Rendering.CoreUtils.ConvertLinearToActiveColorSpace(color.linear));
         }
 
-        //copy of CoreLightEditorUtilities
+        //copy of LightEditorUtilities
 
         static Color RemapLightColor(Color src)
         {
@@ -48,7 +48,7 @@ namespace UnityEditor.Rendering.HighDefinition
             return color;
         }
 
-        //copy of CoreLightEditorUtilities
+        //copy of LightEditorUtilities
         static void DrawHandleLabel(Vector3 handlePosition, string labelText, float offsetFromHandle = 0.3f)
         {
             Vector3 labelPosition = Vector3.zero;
@@ -60,13 +60,13 @@ namespace UnityEditor.Rendering.HighDefinition
             Handles.Label(labelPosition, labelText, style);
         }
 
-        //copy of CoreLightEditorUtilities
+        //copy of LightEditorUtilities
         static float SliderLineHandle(Vector3 position, Vector3 direction, float value)
         {
             return SliderLineHandle(GUIUtility.GetControlID(FocusType.Passive), position, direction, value, "");
         }
 
-        //copy of CoreLightEditorUtilities
+        //copy of LightEditorUtilities
         static float SliderLineHandle(int id, Vector3 position, Vector3 direction, float value, string labelText = "")
         {
             Vector3 pos = position + direction * value;
@@ -89,7 +89,7 @@ namespace UnityEditor.Rendering.HighDefinition
             return value;
         }
 
-        //copy of CoreLightEditorUtilities
+        //copy of LightEditorUtilities
         static Vector2 SliderPlaneHandle(Vector3 origin, Vector3 axis1, Vector3 axis2, Vector2 position)
         {
             Vector3 pos = origin + position.x * axis1 + position.y * axis2;
@@ -105,7 +105,7 @@ namespace UnityEditor.Rendering.HighDefinition
             return position;
         }
 
-        //copy of CoreLightEditorUtilities
+        //copy of LightEditorUtilities
         static float SizeSliderSpotAngle(Vector3 position, Vector3 forward, Vector3 axis, float range, float spotAngle, string controlName)
         {
             if (Mathf.Abs(spotAngle) <= 0.05f)
@@ -137,7 +137,7 @@ namespace UnityEditor.Rendering.HighDefinition
             return spotAngle;
         }
 
-        //TODO: decompose arguments (or tuples) + put back to CoreLightEditorUtilities
+        //TODO: decompose arguments (or tuples) + put back to LightEditorUtilities
         static Vector3 DrawSpotlightHandle(Vector3 outerAngleInnerAngleRange)
         {
             float outerAngle = outerAngleInnerAngleRange.x;
@@ -162,7 +162,7 @@ namespace UnityEditor.Rendering.HighDefinition
             return new Vector3(outerAngle, innerAngle, range);
         }
 
-        //TODO: decompose arguments (or tuples) + put back to CoreLightEditorUtilities
+        //TODO: decompose arguments (or tuples) + put back to LightEditorUtilities
         static void DrawSpotlightWireframe(Vector3 outerAngleInnerAngleRange, float shadowPlaneDistance = -1f)
         {
             float outerAngle = outerAngleInnerAngleRange.x;
@@ -209,13 +209,13 @@ namespace UnityEditor.Rendering.HighDefinition
             Handles.DrawWireDisc(Vector3.forward * height, Vector3.forward, radius);
         }
 
-        //TODO: decompose arguments (or tuples) + put back to CoreLightEditorUtilities
+        //TODO: decompose arguments (or tuples) + put back to LightEditorUtilities
         static void DrawAreaLightWireframe(Vector2 rectangleSize)
         {
             Handles.DrawWireCube(Vector3.zero, rectangleSize);
         }
 
-        //TODO: decompose arguments (or tuples) + put back to CoreLightEditorUtilities
+        //TODO: decompose arguments (or tuples) + put back to LightEditorUtilities
         static Vector2 DrawAreaLightHandle(Vector2 rectangleSize, bool withYAxis)
         {
             float halfWidth = rectangleSize.x * 0.5f;
@@ -243,7 +243,7 @@ namespace UnityEditor.Rendering.HighDefinition
             return new Vector2(halfWidth * 2f, halfHeight * 2f);
         }
 
-        //copy of CoreLightEditorUtilities
+        //copy of LightEditorUtilities
         static Vector3[] GetFrustrumProjectedRectAngles(float distance, float aspect, float tanFOV)
         {
             Vector3 sizeX;
@@ -271,7 +271,7 @@ namespace UnityEditor.Rendering.HighDefinition
             return angles;
         }
 
-        //TODO: decompose arguments (or tuples) + put back to CoreLightEditorUtilities
+        //TODO: decompose arguments (or tuples) + put back to LightEditorUtilities
         // Same as Gizmo.DrawFrustum except that when aspect is below one, fov represent fovX instead of fovY
         // Use to match our light frustum pyramid behavior
         static void DrawSpherePortionWireframe(Vector4 aspectFovMaxRangeMinRange, float distanceTruncPlane = 0f)
@@ -346,7 +346,7 @@ namespace UnityEditor.Rendering.HighDefinition
             return angles;
         }
 
-        //TODO: decompose arguments (or tuples) + put back to CoreLightEditorUtilities
+        //TODO: decompose arguments (or tuples) + put back to LightEditorUtilities
         static Vector4 DrawSpherePortionHandle(Vector4 aspectFovMaxRangeMinRange, bool useNearPlane, float minAspect = 0.05f, float maxAspect = 20f, float minFov = 1f)
         {
             float aspect = aspectFovMaxRangeMinRange.x;
@@ -434,7 +434,7 @@ namespace UnityEditor.Rendering.HighDefinition
             return new Vector4(aspect, fov, maxRange, minRange);
         }
 
-        //TODO: decompose arguments (or tuples) + put back to CoreLightEditorUtilities
+        //TODO: decompose arguments (or tuples) + put back to LightEditorUtilities
         static void DrawOrthoFrustumWireframe(Vector4 widthHeightMaxRangeMinRange, float distanceTruncPlane = 0f)
         {
             float halfWidth = widthHeightMaxRangeMinRange.x * 0.5f;
@@ -487,7 +487,7 @@ namespace UnityEditor.Rendering.HighDefinition
             }
         }
 
-        //TODO: decompose arguments (or tuples) + put back to CoreLightEditorUtilities
+        //TODO: decompose arguments (or tuples) + put back to LightEditorUtilities
         static Vector4 DrawOrthoFrustumHandle(Vector4 widthHeightMaxRangeMinRange, bool useNearHandle)
         {
             float halfWidth = widthHeightMaxRangeMinRange.x * 0.5f;

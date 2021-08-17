@@ -1,66 +1,66 @@
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
-using static UnityEditor.Rendering.CoreLightUnitSliderDescriptors;
+using static UnityEditor.Rendering.LightUnitSliderDescriptors;
 
 namespace UnityEditor.Rendering.HighDefinition
 {
     static class LightUnitSliderDescriptors
     {
         // Lux
-        public static CoreLightUnitSliderUIDescriptor LuxDescriptor = new CoreLightUnitSliderUIDescriptor(
-            LightUnitValueRanges.LuxValueTable,
-            LightUnitSliderDistributions.LuxDistribution,
-            LightUnitTooltips.k_SunCaution,
+        public static LightUnitSliderUIDescriptor LuxDescriptor = new LightUnitSliderUIDescriptor(
+            HDLightUnitValueRanges.LuxValueTable,
+            HDLightUnitSliderDistributions.LuxDistribution,
+            HDLightUnitTooltips.k_SunCaution,
             "Lux"
         );
 
         // Lumen
-        public static CoreLightUnitSliderUIDescriptor LumenDescriptor = new CoreLightUnitSliderUIDescriptor(
-            LightUnitValueRanges.LumenValueTable,
-            LightUnitSliderDistributions.LumenDistribution,
-            LightUnitTooltips.k_PunctualCaution,
+        public static LightUnitSliderUIDescriptor LumenDescriptor = new LightUnitSliderUIDescriptor(
+            HDLightUnitValueRanges.LumenValueTable,
+            HDLightUnitSliderDistributions.LumenDistribution,
+            HDLightUnitTooltips.k_PunctualCaution,
             "Lumen"
         );
 
         // Exposure
-        public static CoreLightUnitSliderUIDescriptor ExposureDescriptor = new CoreLightUnitSliderUIDescriptor(
-            LightUnitValueRanges.ExposureValueTable,
-            CoreLightUnitSliderDistributions.ExposureDistribution,
-            LightUnitTooltips.k_ExposureBelowCaution,
-            LightUnitTooltips.k_ExposureAboveCaution,
+        public static LightUnitSliderUIDescriptor ExposureDescriptor = new LightUnitSliderUIDescriptor(
+            HDLightUnitValueRanges.ExposureValueTable,
+            LightUnitSliderDistributions.ExposureDistribution,
+            HDLightUnitTooltips.k_ExposureBelowCaution,
+            HDLightUnitTooltips.k_ExposureAboveCaution,
             "EV"
         );
 
-        private static class LightUnitValueRanges
+        private static class HDLightUnitValueRanges
         {
-            public static readonly CoreLightUnitSliderUIRange[] LumenValueTable =
+            public static readonly LightUnitSliderUIRange[] LumenValueTable =
             {
-                new CoreLightUnitSliderUIRange(LightUnitIcon.ExteriorLight,  LightUnitTooltips.k_PunctualExterior,   new Vector2(3000, 40000), 10000),
-                new CoreLightUnitSliderUIRange(LightUnitIcon.InteriorLight,  LightUnitTooltips.k_PunctualInterior,   new Vector2(300,  3000),  1000),
-                new CoreLightUnitSliderUIRange(LightUnitIcon.DecorativeLight, LightUnitTooltips.k_PunctualDecorative, new Vector2(15,   300),   100),
-                new CoreLightUnitSliderUIRange(CoreLightUnitIcon.Candlelight,    LightUnitTooltips.k_PunctualCandle,     new Vector2(0,    15),    12.5f),
+                new LightUnitSliderUIRange(HDLightUnitIcon.ExteriorLight,   HDLightUnitTooltips.k_PunctualExterior,   new Vector2(3000, 40000), 10000),
+                new LightUnitSliderUIRange(HDLightUnitIcon.InteriorLight,   HDLightUnitTooltips.k_PunctualInterior,   new Vector2(300,  3000),  1000),
+                new LightUnitSliderUIRange(HDLightUnitIcon.DecorativeLight, HDLightUnitTooltips.k_PunctualDecorative, new Vector2(15,   300),   100),
+                new LightUnitSliderUIRange(LightUnitIcon.Candlelight,       HDLightUnitTooltips.k_PunctualCandle,     new Vector2(0,    15),    12.5f),
             };
 
-            public static readonly CoreLightUnitSliderUIRange[] LuxValueTable =
+            public static readonly LightUnitSliderUIRange[] LuxValueTable =
             {
-                new CoreLightUnitSliderUIRange(LightUnitIcon.BrightSky,     LightUnitTooltips.k_LuxBrightSky,     new Vector2(80000, 130000), 100000),
-                new CoreLightUnitSliderUIRange(LightUnitIcon.Overcast,      LightUnitTooltips.k_LuxOvercastSky,   new Vector2(10000, 80000),  20000),
-                new CoreLightUnitSliderUIRange(LightUnitIcon.SunriseSunset, LightUnitTooltips.k_LuxSunriseSunset, new Vector2(1,     10000),  5000),
-                new CoreLightUnitSliderUIRange(LightUnitIcon.Moonlight,     LightUnitTooltips.k_LuxMoonlight,     new Vector2(0,     1),      0.5f),
+                new LightUnitSliderUIRange(HDLightUnitIcon.BrightSky,     HDLightUnitTooltips.k_LuxBrightSky,     new Vector2(80000, 130000), 100000),
+                new LightUnitSliderUIRange(HDLightUnitIcon.Overcast,      HDLightUnitTooltips.k_LuxOvercastSky,   new Vector2(10000, 80000),  20000),
+                new LightUnitSliderUIRange(HDLightUnitIcon.SunriseSunset, HDLightUnitTooltips.k_LuxSunriseSunset, new Vector2(1,     10000),  5000),
+                new LightUnitSliderUIRange(HDLightUnitIcon.Moonlight,     HDLightUnitTooltips.k_LuxMoonlight,     new Vector2(0,     1),      0.5f),
             };
 
-            public static readonly CoreLightUnitSliderUIRange[] ExposureValueTable =
+            public static readonly LightUnitSliderUIRange[] ExposureValueTable =
             {
-                new CoreLightUnitSliderUIRange(LightUnitIcon.BrightSky,     LightUnitTooltips.k_ExposureBrightSky,     new Vector2(12, 15), 13),
-                new CoreLightUnitSliderUIRange(LightUnitIcon.Overcast,      LightUnitTooltips.k_ExposureOvercastSky,   new Vector2(8,  12)),
-                new CoreLightUnitSliderUIRange(LightUnitIcon.SunriseSunset, LightUnitTooltips.k_ExposureSunriseSunset, new Vector2(6,   8)),
-                new CoreLightUnitSliderUIRange(LightUnitIcon.InteriorLight, LightUnitTooltips.k_ExposureInterior,      new Vector2(3,   6)),
-                new CoreLightUnitSliderUIRange(LightUnitIcon.Moonlight,     LightUnitTooltips.k_ExposureMoonlitSky,    new Vector2(0,   3)),
-                new CoreLightUnitSliderUIRange(LightUnitIcon.MoonlessNight, LightUnitTooltips.k_ExposureMoonlessNight, new Vector2(-5,  0)),
+                new LightUnitSliderUIRange(HDLightUnitIcon.BrightSky,     HDLightUnitTooltips.k_ExposureBrightSky,     new Vector2(12, 15), 13),
+                new LightUnitSliderUIRange(HDLightUnitIcon.Overcast,      HDLightUnitTooltips.k_ExposureOvercastSky,   new Vector2(8,  12)),
+                new LightUnitSliderUIRange(HDLightUnitIcon.SunriseSunset, HDLightUnitTooltips.k_ExposureSunriseSunset, new Vector2(6,   8)),
+                new LightUnitSliderUIRange(HDLightUnitIcon.InteriorLight, HDLightUnitTooltips.k_ExposureInterior,      new Vector2(3,   6)),
+                new LightUnitSliderUIRange(HDLightUnitIcon.Moonlight,     HDLightUnitTooltips.k_ExposureMoonlitSky,    new Vector2(0,   3)),
+                new LightUnitSliderUIRange(HDLightUnitIcon.MoonlessNight, HDLightUnitTooltips.k_ExposureMoonlessNight, new Vector2(-5,  0)),
             };
         }
 
-        private static class LightUnitSliderDistributions
+        private static class HDLightUnitSliderDistributions
         {
             // Warning: All of these values need to be kept in sync with their associated descriptor's set of value ranges.
             public static readonly float[] LuxDistribution = {0.0f, 0.05f, 0.5f, 0.9f, 1.0f};
@@ -76,10 +76,9 @@ namespace UnityEditor.Rendering.HighDefinition
             };
         }
 
-        private static class LightUnitIcon
+        private static class HDLightUnitIcon
         {
-            static string GetLightUnitIconPath() => HDUtils.GetHDRenderPipelinePath() +
-            "/Editor/RenderPipelineResources/Texture/LightUnitIcons/";
+            static string GetLightUnitIconPath() => HDUtils.GetHDRenderPipelinePath() + "/Editor/RenderPipelineResources/Texture/LightUnitIcons/";
 
             // Note: We do not use the editor resource loading mechanism for light unit icons because we need to skin the icon correctly for the editor theme.
             // Maybe the resource reloader can be improved to support icon loading (thus supporting skinning)?
@@ -104,7 +103,7 @@ namespace UnityEditor.Rendering.HighDefinition
             public static Texture2D BrightSky        = GetLightUnitIcon("BrightSky");
         }
 
-        private static class LightUnitTooltips
+        private static class HDLightUnitTooltips
         {
             // Caution
             public const string k_SunCaution           = "Higher than Sunlight";

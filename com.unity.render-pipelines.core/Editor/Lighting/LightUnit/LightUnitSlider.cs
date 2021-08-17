@@ -6,7 +6,7 @@ namespace UnityEditor.Rendering
     /// <summary>
     /// Formats the provided descriptor into a linear slider with contextual slider markers, tooltips, and icons.
     /// </summary>
-    public class CoreLightUnitSlider
+    public class LightUnitSlider
     {
         protected SerializedObject m_SerializedObject;
 
@@ -27,14 +27,14 @@ namespace UnityEditor.Rendering
             public static GUIStyle k_TemperatureThumb = new GUIStyle("ColorPickerHorizThumb");
         }
 
-        protected readonly CoreLightUnitSliderUIDescriptor m_Descriptor;
+        protected readonly LightUnitSliderUIDescriptor m_Descriptor;
 
 
         /// <summary>
         /// Constructs the slider
         /// </summary>
-        /// <param name="descriptor"><see cref="CoreLightUnitSliderUIDescriptor"/> with a descriptor for the slider</param>
-        protected CoreLightUnitSlider(CoreLightUnitSliderUIDescriptor descriptor)
+        /// <param name="descriptor"><see cref="LightUnitSliderUIDescriptor"/> with a descriptor for the slider</param>
+        protected LightUnitSlider(LightUnitSliderUIDescriptor descriptor)
         {
             m_Descriptor = descriptor;
         }
@@ -86,7 +86,7 @@ namespace UnityEditor.Rendering
             DoThumbTooltip(sliderRect, thumbPosition, thumbValue, thumbTooltip);
         }
 
-        CoreLightUnitSliderUIRange CurrentRange(float value)
+        LightUnitSliderUIRange CurrentRange(float value)
         {
             foreach (var l in m_Descriptor.valueRanges)
             {
@@ -98,7 +98,7 @@ namespace UnityEditor.Rendering
 
             var cautionValue = value < m_Descriptor.sliderRange.x ? m_Descriptor.sliderRange.x : m_Descriptor.sliderRange.y;
             var cautionTooltip = value < m_Descriptor.sliderRange.x ? m_Descriptor.belowRangeTooltip : m_Descriptor.aboveRangeTooltip;
-            return CoreLightUnitSliderUIRange.CautionRange(cautionTooltip, cautionValue);
+            return LightUnitSliderUIRange.CautionRange(cautionTooltip, cautionValue);
         }
 
         void BuildRects(Rect baseRect, out Rect sliderRect, out Rect iconRect)
@@ -218,7 +218,7 @@ namespace UnityEditor.Rendering
             EditorGUI.LabelField(thumbMarkerRect, GetLightUnitTooltip(tooltip, value, m_Descriptor.unitName));
         }
 
-        protected virtual void SetValueToPreset(SerializedProperty value, CoreLightUnitSliderUIRange preset)
+        protected virtual void SetValueToPreset(SerializedProperty value, LightUnitSliderUIRange preset)
         {
             m_SerializedObject?.Update();
 
@@ -266,7 +266,7 @@ namespace UnityEditor.Rendering
         }
     }
 
-    class TemperatureSlider : CoreLightUnitSlider
+    class TemperatureSlider : LightUnitSlider
     {
         private Vector3 m_ExponentialConstraints;
 
@@ -327,7 +327,7 @@ namespace UnityEditor.Rendering
             return s_KelvinGradientTexture;
         }
 
-        public TemperatureSlider(CoreLightUnitSliderUIDescriptor descriptor) : base(descriptor)
+        public TemperatureSlider(LightUnitSliderUIDescriptor descriptor) : base(descriptor)
         {
             var halfValue = 6500;
             PrepareExponentialConstraints(m_Descriptor.sliderRange.x, halfValue, m_Descriptor.sliderRange.y);
@@ -339,7 +339,7 @@ namespace UnityEditor.Rendering
         }
 
         // The serialized property for color temperature is stored in the build-in light editor, and we need to use this object to apply the update.
-        protected override void SetValueToPreset(SerializedProperty value, CoreLightUnitSliderUIRange preset)
+        protected override void SetValueToPreset(SerializedProperty value, LightUnitSliderUIRange preset)
         {
             m_Settings.Update();
 
@@ -380,7 +380,7 @@ namespace UnityEditor.Rendering
     public static class TemperatureSliderSliderUIDrawer
     {
         // Kelvin is not classified internally as a light unit so we handle it independently as well.
-        static readonly TemperatureSlider k_TemperatureSlider = new TemperatureSlider(CoreLightUnitSliderDescriptors.TemperatureDescriptor);
+        static readonly TemperatureSlider k_TemperatureSlider = new TemperatureSlider(LightUnitSliderDescriptors.TemperatureDescriptor);
 
         /// <summary>
         /// Draws a temperature slider in the given light editor

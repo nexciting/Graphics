@@ -6,15 +6,15 @@ namespace UnityEditor.Rendering
     /// <summary>
     /// Descriptors for Light Units
     /// </summary>
-    public struct CoreLightUnitSliderUIDescriptor
+    public struct LightUnitSliderUIDescriptor
     {
-        public CoreLightUnitSliderUIDescriptor(CoreLightUnitSliderUIRange[] valueRanges, float[] sliderDistribution,
-                                               string cautionTooltip, string unitName, bool hasMarkers = true, bool clampValue = false)
+        public LightUnitSliderUIDescriptor(LightUnitSliderUIRange[] valueRanges, float[] sliderDistribution,
+                                           string cautionTooltip, string unitName, bool hasMarkers = true, bool clampValue = false)
             : this(valueRanges, sliderDistribution, cautionTooltip, cautionTooltip, unitName, hasMarkers, clampValue)
         {}
 
-        public CoreLightUnitSliderUIDescriptor(CoreLightUnitSliderUIRange[] valueRanges, float[] sliderDistribution, string belowRangeTooltip,
-                                               string aboveRangeTooltip, string unitName, bool hasMarkers = true, bool clampValue = false)
+        public LightUnitSliderUIDescriptor(LightUnitSliderUIRange[] valueRanges, float[] sliderDistribution, string belowRangeTooltip,
+                                           string aboveRangeTooltip, string unitName, bool hasMarkers = true, bool clampValue = false)
         {
             this.valueRanges = valueRanges;
             this.belowRangeTooltip = belowRangeTooltip;
@@ -31,7 +31,7 @@ namespace UnityEditor.Rendering
         }
 
         public readonly float[] sliderDistribution;
-        public readonly CoreLightUnitSliderUIRange[] valueRanges;
+        public readonly LightUnitSliderUIRange[] valueRanges;
         public readonly Vector2 sliderRange;
         public readonly string belowRangeTooltip;
         public readonly string aboveRangeTooltip;
@@ -43,7 +43,7 @@ namespace UnityEditor.Rendering
     /// <summary>
     /// Range for Light Unit Slider
     /// </summary>
-    public struct CoreLightUnitSliderUIRange
+    public struct LightUnitSliderUIRange
     {
         /// <summary>
         /// Constructs this range
@@ -51,7 +51,7 @@ namespace UnityEditor.Rendering
         /// <param name="icon"><see cref="Texture2D"/>The icon</param>
         /// <param name="tooltip">The tooltip</param>
         /// <param name="value"><see cref="Vector2"/>The range of this slider</param>
-        public CoreLightUnitSliderUIRange(Texture2D icon, string tooltip, Vector2 value)
+        public LightUnitSliderUIRange(Texture2D icon, string tooltip, Vector2 value)
         // If no preset value provided, then by default it is the average of the value range.
             : this(icon, tooltip, value, 0.5f * (value.x + value.y))
         {}
@@ -63,7 +63,7 @@ namespace UnityEditor.Rendering
         /// <param name="tooltip">The tooltip</param>
         /// <param name="value"><see cref="Vector2"/>The range of this slider</param>
         /// <param name="presetValue">Preset values are arbitrarily chosen by artist</param>
-        public CoreLightUnitSliderUIRange(Texture2D icon, string tooltip, Vector2 value, float presetValue)
+        public LightUnitSliderUIRange(Texture2D icon, string tooltip, Vector2 value, float presetValue)
         {
             this.content = new GUIContent(icon, tooltip);
             this.value = value;
@@ -82,7 +82,7 @@ namespace UnityEditor.Rendering
         /// <param name="tooltip">The tooltip</param>
         /// <param name="value"><see cref="Vector2"/>The range of this slider</param>
         /// <param name="presetValue">Preset values are arbitrarily chosen by artist</param>
-        public static CoreLightUnitSliderUIRange CautionRange(string tooltip, float value) => new CoreLightUnitSliderUIRange
+        public static LightUnitSliderUIRange CautionRange(string tooltip, float value) => new LightUnitSliderUIRange
         {
             // Load the buildin caution icon with provided tooltip.
             content = EditorGUIUtility.TrIconContent(CoreEditorStyles.iconWarn, tooltip),
@@ -108,38 +108,38 @@ namespace UnityEditor.Rendering
 
 
     /// <summary>
-    /// Helper class to store the <see cref="CoreLightUnitSliderUIDescriptor"/>
+    /// Helper class to store the <see cref="LightUnitSliderUIDescriptor"/>
     /// </summary>
-    public static class CoreLightUnitSliderDescriptors
+    public static class LightUnitSliderDescriptors
     {
         // Temperature
-        public static CoreLightUnitSliderUIDescriptor TemperatureDescriptor = new CoreLightUnitSliderUIDescriptor(
-            CoreLightUnitValueRanges.KelvinValueTableNew,
-            CoreLightUnitSliderDistributions.ExposureDistribution,
-            CoreLightUnitTooltips.k_TemperatureCaution,
+        public static LightUnitSliderUIDescriptor TemperatureDescriptor = new LightUnitSliderUIDescriptor(
+            LightUnitValueRanges.KelvinValueTableNew,
+            LightUnitSliderDistributions.ExposureDistribution,
+            LightUnitTooltips.k_TemperatureCaution,
             "Kelvin",
             false,
             true
         );
 
-        private static class CoreLightUnitValueRanges
+        private static class LightUnitValueRanges
         {
-            public static readonly CoreLightUnitSliderUIRange[] KelvinValueTableNew =
+            public static readonly LightUnitSliderUIRange[] KelvinValueTableNew =
             {
-                new CoreLightUnitSliderUIRange(CoreLightUnitIcon.BlueSky,          CoreLightUnitTooltips.k_TemperatureBlueSky,          new Vector2(10000, 20000), 15000),
-                new CoreLightUnitSliderUIRange(CoreLightUnitIcon.Shade,            CoreLightUnitTooltips.k_TemperatureShade,            new Vector2(7000,  10000), 8000),
-                new CoreLightUnitSliderUIRange(CoreLightUnitIcon.CloudySky,        CoreLightUnitTooltips.k_TemperatureCloudySky,        new Vector2(6000,   7000), 6500),
-                new CoreLightUnitSliderUIRange(CoreLightUnitIcon.DirectSunlight,   CoreLightUnitTooltips.k_TemperatureDirectSunlight,   new Vector2(4500,   6000), 5500),
-                new CoreLightUnitSliderUIRange(CoreLightUnitIcon.Fluorescent,      CoreLightUnitTooltips.k_TemperatureFluorescent,      new Vector2(3500,   4500), 4000),
-                new CoreLightUnitSliderUIRange(CoreLightUnitIcon.IntenseAreaLight, CoreLightUnitTooltips.k_TemperatureIncandescent,     new Vector2(2500,   3500), 3000),
-                new CoreLightUnitSliderUIRange(CoreLightUnitIcon.Candlelight,      CoreLightUnitTooltips.k_TemperatureCandle,           new Vector2(1500,   2500), 1900),
+                new LightUnitSliderUIRange(LightUnitIcon.BlueSky,          LightUnitTooltips.k_TemperatureBlueSky,          new Vector2(10000, 20000), 15000),
+                new LightUnitSliderUIRange(LightUnitIcon.Shade,            LightUnitTooltips.k_TemperatureShade,            new Vector2(7000,  10000), 8000),
+                new LightUnitSliderUIRange(LightUnitIcon.CloudySky,        LightUnitTooltips.k_TemperatureCloudySky,        new Vector2(6000,   7000), 6500),
+                new LightUnitSliderUIRange(LightUnitIcon.DirectSunlight,   LightUnitTooltips.k_TemperatureDirectSunlight,   new Vector2(4500,   6000), 5500),
+                new LightUnitSliderUIRange(LightUnitIcon.Fluorescent,      LightUnitTooltips.k_TemperatureFluorescent,      new Vector2(3500,   4500), 4000),
+                new LightUnitSliderUIRange(LightUnitIcon.IntenseAreaLight, LightUnitTooltips.k_TemperatureIncandescent,     new Vector2(2500,   3500), 3000),
+                new LightUnitSliderUIRange(LightUnitIcon.Candlelight,      LightUnitTooltips.k_TemperatureCandle,           new Vector2(1500,   2500), 1900),
             };
         }
 
         /// <summary>
         /// Light Unit Icons
         /// </summary>
-        public static class CoreLightUnitIcon
+        public static class LightUnitIcon
         {
             // Note: We do not use the editor resource loading mechanism for light unit icons because we need to skin the icon correctly for the editor theme.
             // Maybe the resource reloader can be improved to support icon loading (thus supporting skinning)?
@@ -161,7 +161,7 @@ namespace UnityEditor.Rendering
         /// <summary>
         /// Distributions for light units
         /// </summary>
-        public static class CoreLightUnitSliderDistributions
+        public static class LightUnitSliderDistributions
         {
             private const float ExposureStep = 1 / 6f;
             public static readonly float[] ExposureDistribution =
@@ -176,7 +176,7 @@ namespace UnityEditor.Rendering
             };
         }
 
-        private static class CoreLightUnitTooltips
+        private static class LightUnitTooltips
         {
             // Caution
             public const string k_TemperatureCaution   = "";

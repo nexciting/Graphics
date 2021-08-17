@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 namespace UnityEditor.Rendering
 {
     /// <summary>Utility class for drawing light Editor gizmos</summary>
-    public static class CoreLightEditorUtilities
+    public static class LightEditorUtilities
     {
         [Flags]
         enum HandleDirections
@@ -675,5 +675,10 @@ namespace UnityEditor.Rendering
 
             return spotAngle;
         }
+    }
+
+    [Obsolete("Renamed (UnityUpgradable) -> LightEditorUtilities", true)]
+    public static class CoreLightEditorUtilities
+    {
     }
 }
