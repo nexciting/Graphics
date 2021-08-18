@@ -136,9 +136,9 @@ namespace UnityEditor.Rendering.HighDefinition
                 CED.Group((serialized, owner) =>
                     EditorGUILayout.HelpBox(s_Styles.unsupportedPresetPropertiesMessage, MessageType.Info)),
                 CED.Group((serialized, owner) => EditorGUILayout.Space()),
-                CED.FoldoutGroup(s_Styles.generalHeader, Expandable.General, k_ExpandedStatePreset, DrawGeneralContent),
-                CED.FoldoutGroup(s_Styles.emissionHeader, Expandable.Emission, k_ExpandedStatePreset, DrawEmissionContentForPreset),
-                CED.FoldoutGroup(s_Styles.shadowHeader, Expandable.Shadows, k_ExpandedStatePreset, DrawEnableShadowMapInternal)
+                CED.FoldoutGroup(LightUI.Styles.generalHeader, Expandable.General, k_ExpandedStatePreset, DrawGeneralContent),
+                CED.FoldoutGroup(LightUI.Styles.emissionHeader, Expandable.Emission, k_ExpandedStatePreset, DrawEmissionContentForPreset),
+                CED.FoldoutGroup(LightUI.Styles.shadowHeader, Expandable.Shadows, k_ExpandedStatePreset, DrawEnableShadowMapInternal)
             );
         }
 
