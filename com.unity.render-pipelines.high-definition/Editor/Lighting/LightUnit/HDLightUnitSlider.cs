@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
-using UnityEngine.Experimental.Rendering;
 
 namespace UnityEditor.Rendering.HighDefinition
 {
@@ -132,7 +131,7 @@ namespace UnityEditor.Rendering.HighDefinition
     /// <summary>
     /// Formats the provided descriptor into a punctual light unit slider with contextual slider markers, tooltips, and icons.
     /// </summary>
-    class HDPunctualLightUnitSlider : PiecewiseLightUnitSlider
+    class HDPunctualLightUnitSlider : HDPiecewiseLightUnitSlider
     {
         public HDPunctualLightUnitSlider(LightUnitSliderUIDescriptor descriptor) : base(descriptor) {}
 
@@ -222,20 +221,20 @@ namespace UnityEditor.Rendering.HighDefinition
 
     internal class HDLightUnitSliderUIDrawer
     {
-        static PiecewiseLightUnitSlider k_DirectionalLightUnitSlider;
-        static PunctualLightUnitSlider  k_PunctualLightUnitSlider;
-        static PiecewiseLightUnitSlider k_ExposureSlider;
+        static HDPiecewiseLightUnitSlider k_DirectionalLightUnitSlider;
+        static HDPunctualLightUnitSlider  k_PunctualLightUnitSlider;
+        static HDPiecewiseLightUnitSlider k_ExposureSlider;
 
         static HDLightUnitSliderUIDrawer()
         {
             // Maintain a unique slider for directional/lux.
-            k_DirectionalLightUnitSlider = new PiecewiseLightUnitSlider(LightUnitSliderDescriptors.LuxDescriptor);
+            k_DirectionalLightUnitSlider = new HDPiecewiseLightUnitSlider(LightUnitSliderDescriptors.LuxDescriptor);
 
             // Internally, slider is always in terms of lumens, so that the slider is uniform for all light units.
-            k_PunctualLightUnitSlider = new PunctualLightUnitSlider(LightUnitSliderDescriptors.LumenDescriptor);
+            k_PunctualLightUnitSlider = new HDPunctualLightUnitSlider(LightUnitSliderDescriptors.LumenDescriptor);
 
             // Exposure is in EV100, but we load a separate due to the different icon set.
-            k_ExposureSlider = new PiecewiseLightUnitSlider(LightUnitSliderDescriptors.ExposureDescriptor);
+            k_ExposureSlider = new HDPiecewiseLightUnitSlider(LightUnitSliderDescriptors.ExposureDescriptor);
         }
 
         // Need to cache the serialized object on the slider, to add support for the preset selection context menu (need to apply changes to serialized)
