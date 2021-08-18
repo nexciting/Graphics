@@ -1,6 +1,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Rendering;
@@ -25,7 +26,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 }
             }
         }
-
 
         enum ShadowmaskMode
         {
@@ -56,8 +56,7 @@ namespace UnityEditor.Rendering.HighDefinition
             Shadow = 1 << 3,
         }
 
-
-        readonly static ExpandedState<Expandable, Light> k_ExpandedState = new ExpandedState<Expandable, Light>(~(-1), "HDRP");
+        readonly static ExpandedState<Expandable, Light> k_ExpandedState = new ExpandedState<Expandable, Light>(0, "HDRP");
         readonly static AdditionalPropertiesState<AdditionalProperties, Light> k_AdditionalPropertiesState = new AdditionalPropertiesState<AdditionalProperties, Light>(0, "HDRP");
 
         readonly static LightUnitSliderUIDrawer k_LightUnitSliderUIDrawer = new LightUnitSliderUIDrawer();
@@ -132,6 +131,15 @@ namespace UnityEditor.Rendering.HighDefinition
             var getLightingSettingsOrDefaultsFallbackInfo = lightMappingType.GetMethod("GetLightingSettingsOrDefaultsFallback", BindingFlags.Static | BindingFlags.NonPublic);
             var getLightingSettingsOrDefaultsFallbackLambda = Expression.Lambda<Func<LightingSettings>>(Expression.Call(null, getLightingSettingsOrDefaultsFallbackInfo));
             GetLightingSettingsOrDefaultsFallback = getLightingSettingsOrDefaultsFallbackLambda.Compile();
+
+            PresetInspector = CED.Group(
+                CED.Group((serialized, owner) =>
+                    EditorGUILayout.HelpBox(s_Styles.unsupportedPresetPropertiesMessage, MessageType.Info)),
+                CED.Group((serialized, owner) => EditorGUILayout.Space()),
+                CED.FoldoutGroup(s_Styles.generalHeader, Expandable.General, k_ExpandedStatePreset, DrawGeneralContent),
+                CED.FoldoutGroup(s_Styles.emissionHeader, Expandable.Emission, k_ExpandedStatePreset, DrawEmissionContentForPreset),
+                CED.FoldoutGroup(s_Styles.shadowHeader, Expandable.Shadows, k_ExpandedStatePreset, DrawEnableShadowMapInternal)
+            );
         }
 
         static void DrawGeneralContent(SerializedHDLight serialized, Editor owner)
@@ -629,7 +637,18 @@ namespace UnityEditor.Rendering.HighDefinition
 
         static void DrawEmissionContent(SerializedHDLight serialized, Editor owner)
         {
-            DrawLightIntensityGUILayout(serialized, owner);
+            DrawEmissionContentFiltered(serialized, owner, isInPreset: false);
+        }
+
+        static void DrawEmissionContentForPreset(SerializedHDLight serialized, Editor owner)
+        {
+            DrawEmissionContentFiltered(serialized, owner, isInPreset: true);
+        }
+
+        static void DrawEmissionContentFiltered(SerializedHDLight serialized, Editor owner, bool isInPreset)
+        {
+            if (!isInPreset)
+                DrawLightIntensityGUILayout(serialized, owner);
 
             HDLightType lightType = serialized.type;
             SpotLightShape spotLightShape = serialized.spotLightShape.GetEnumValue<SpotLightShape>();
@@ -722,7 +741,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 EditorGUILayout.ObjectField(serialized.areaLightCookie, s_Styles.areaLightCookie);
                 ShowCookieTextureWarnings(serialized.areaLightCookie.objectReferenceValue as Texture, serialized.settings.isCompletelyBaked || serialized.settings.isBakedOrMixed);
             }
-
             if (serialized.type == HDLightType.Point || serialized.type == HDLightType.Spot || (serialized.type == HDLightType.Area && serialized.areaLightShape == AreaLightShape.Rectangle))
             {
                 EditorGUI.BeginChangeCheck();
@@ -761,13 +779,13 @@ namespace UnityEditor.Rendering.HighDefinition
                     serialized.iesPoint.serializedObject.ApplyModifiedProperties();
                     serialized.iesSpot.serializedObject.ApplyModifiedProperties();
                 }
-            }
 
-            if (serialized.type == HDLightType.Spot &&
-                serialized.spotLightShape.enumValueIndex == (int)SpotLightShape.Cone &&
-                serialized.iesSpot.objectReferenceValue != null)
-            {
-                EditorGUILayout.PropertyField(serialized.spotIESCutoffPercent, s_Styles.spotIESCutoffPercent);
+                if (serialized.type == HDLightType.Spot &&
+                    serialized.spotLightShape.enumValueIndex == (int)SpotLightShape.Cone &&
+                    serialized.iesSpot.objectReferenceValue != null)
+                {
+                    EditorGUILayout.PropertyField(serialized.spotIESCutoffPercent, s_Styles.spotIESCutoffPercent);
+                }
             }
 
             if (EditorGUI.EndChangeCheck())
@@ -960,7 +978,7 @@ namespace UnityEditor.Rendering.HighDefinition
             }
         }
 
-        static bool DrawEnableShadowMap(SerializedHDLight serialized, Editor owne)
+        static bool DrawEnableShadowMap(SerializedHDLight serialized, Editor owner)
         {
             Rect lineRect = EditorGUILayout.GetControlRect();
             bool newShadowsEnabled;
@@ -977,6 +995,12 @@ namespace UnityEditor.Rendering.HighDefinition
             EditorGUI.EndProperty();
 
             return newShadowsEnabled;
+        }
+
+        // Needed to work around the need for CED Group with no return value
+        static void DrawEnableShadowMapInternal(SerializedHDLight serialized, Editor owner)
+        {
+            DrawEnableShadowMap(serialized, owner);
         }
 
         static void DrawShadowMapContent(SerializedHDLight serialized, Editor owner)

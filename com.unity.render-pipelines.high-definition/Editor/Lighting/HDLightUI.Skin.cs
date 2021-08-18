@@ -11,6 +11,7 @@ namespace UnityEditor.Rendering.HighDefinition
             // Headers
             public readonly GUIContent celestialBodyHeader = EditorGUIUtility.TrTextContent("Celestial Body");
             public readonly GUIContent volumetricHeader = EditorGUIUtility.TrTextContent("Volumetrics");
+
             public readonly GUIContent shadowMapSubHeader = EditorGUIUtility.TrTextContent("Shadow Map");
             public readonly GUIContent contactShadowsSubHeader = EditorGUIUtility.TrTextContent("Contact Shadows");
             public readonly GUIContent bakedShadowsSubHeader = EditorGUIUtility.TrTextContent("Baked Shadows");
@@ -141,8 +142,8 @@ namespace UnityEditor.Rendering.HighDefinition
             // Settings
             public readonly GUIContent enableShadowMap = EditorGUIUtility.TrTextContent("Enable", "When enabled, this Light casts shadows.");
 
-            // Warnings
-            public readonly string unsupportedLightShapeWarning = "This light shape is not supported by Realtime Global Illumination.";
+            public readonly string unsupportedLightShapeWarning = L10n.Tr("This light shape is not supported by Realtime Global Illumination.");
+            public readonly string unsupportedPresetPropertiesMessage = L10n.Tr("When using Preset of Light Component, only a subset of properties are supported.  Unsupported properties are hidden.");
         }
 
         static Styles s_Styles = new Styles();
