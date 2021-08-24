@@ -323,6 +323,7 @@ namespace UnityEngine.Rendering.HighDefinition
             public int sliceIndex;
             public Vector4 channelMask;
             public Vector4 distanceChannelMask;
+            public bool fullResolution;
 
             // Kernels
             public int temporalAccKernel;
@@ -386,6 +387,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 passData.sliceIndex = sliceIndex;
                 passData.channelMask = channelMask;
                 passData.distanceChannelMask = distanceChannelMask;
+                passData.fullResolution = true;
 
                 // Kernels
                 passData.temporalAccKernel = singleChannel ? m_TemporalAccumulationSingleArrayKernel : m_TemporalAccumulationColorArrayKernel;
@@ -492,6 +494,7 @@ namespace UnityEngine.Rendering.HighDefinition
                             ctx.cmd.SetComputeTextureParam(data.temporalFilterCS, data.temporalAccSingleKernel, HDShaderIDs._AccumulationOutputTextureRW, data.outputDistanceSignal);
 
                             // Dispatch the temporal accumulation
+                            CoreUtils.SetKeyword(ctx.cmd, "FULL_RESOLUTION_FILTER", data.fullResolution);
                             ctx.cmd.DispatchCompute(data.temporalFilterCS, data.temporalAccSingleKernel, numTilesX, numTilesY, data.viewCount);
 
                             // Make sure to copy the new-accumulated signal in our history buffer
@@ -507,6 +510,7 @@ namespace UnityEngine.Rendering.HighDefinition
                             ctx.cmd.SetComputeTextureParam(data.temporalFilterCS, data.outputHistoryKernel, HDShaderIDs._IntermediateDenoiseOutputTexture, data.intermediateSignalOutput);
                             ctx.cmd.SetComputeTextureParam(data.temporalFilterCS, data.outputHistoryKernel, HDShaderIDs._DenoiseOutputArrayTextureRW, data.intermediateSignalOutput);
                             ctx.cmd.DispatchCompute(data.temporalFilterCS, data.outputHistoryKernel, numTilesX, numTilesY, data.viewCount);
+                            CoreUtils.SetKeyword(ctx.cmd, "FULL_RESOLUTION_INPUT", true);
                         }
                     });
 
