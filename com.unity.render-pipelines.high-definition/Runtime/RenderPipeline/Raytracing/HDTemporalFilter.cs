@@ -367,7 +367,7 @@ namespace UnityEngine.Rendering.HighDefinition
             TextureHandle velocityBuffer,
             RTHandle validationHistoryBuffer,
             int sliceIndex, Vector4 channelMask, Vector4 distanceChannelMask,
-            bool distanceBased, bool singleChannel, float historyValidity)
+            bool distanceBased, bool singleChannel, float historyValidity, bool fullResolution)
         {
             TemporalDenoiserArrayOutputData resultData = new TemporalDenoiserArrayOutputData();
             using (var builder = renderGraph.AddRenderPass<TemporalFilterArrayPassData>("TemporalDenoiser", out var passData, ProfilingSampler.Get(HDProfileId.TemporalFilter)))
@@ -387,7 +387,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 passData.sliceIndex = sliceIndex;
                 passData.channelMask = channelMask;
                 passData.distanceChannelMask = distanceChannelMask;
-                passData.fullResolution = true;
+                passData.fullResolution = fullResolution;
 
                 // Kernels
                 passData.temporalAccKernel = singleChannel ? m_TemporalAccumulationSingleArrayKernel : m_TemporalAccumulationColorArrayKernel;

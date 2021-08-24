@@ -57,7 +57,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 velocityBuffer,
                 shadowHistoryValidityArray,
                 lightData.screenSpaceShadowIndex / 4, m_ShadowChannelMask0, m_ShadowChannelMask0,
-                additionalLightData.distanceBasedFiltering, true, historyValidity);
+                additionalLightData.distanceBasedFiltering, true, historyValidity, true);
 
             TextureHandle denoisedBuffer;
             if (additionalLightData.distanceBasedFiltering)

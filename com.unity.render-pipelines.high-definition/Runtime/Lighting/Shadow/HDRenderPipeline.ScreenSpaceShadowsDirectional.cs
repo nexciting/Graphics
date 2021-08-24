@@ -49,7 +49,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 velocityBuffer,
                 shadowHistoryValidityArray,
                 dirShadowIndex / 4, m_ShadowChannelMask0, m_ShadowChannelMask1,
-                true, !m_CurrentSunLightAdditionalLightData.colorShadow, historyValidity);
+                true, !m_CurrentSunLightAdditionalLightData.colorShadow, historyValidity, true);
 
             // Apply the spatial denoiser
             HDDiffuseShadowDenoiser shadowDenoiser = GetDiffuseShadowDenoiser();
