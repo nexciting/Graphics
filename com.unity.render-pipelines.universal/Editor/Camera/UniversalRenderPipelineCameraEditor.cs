@@ -14,6 +14,12 @@ namespace UnityEditor.Rendering.Universal
     [CanEditMultipleObjects]
     class UniversalRenderPipelineCameraEditor : CameraEditor
     {
+        [MenuItem("CONTEXT/Camera/Remove Component")]
+        static void RemoveCameraComponent(MenuCommand command)
+        {
+            ContextualMenuDispatcher.RemoveComponent<Camera, UniversalAdditionalCameraData>(command);
+        }
+
         ReorderableList m_LayerList;
 
         public Camera camera => target as Camera;
@@ -504,41 +510,7 @@ namespace UnityEditor.Rendering.Universal
     }
 
     [ScriptableRenderPipelineExtension(typeof(UniversalRenderPipelineAsset))]
-    class UniversalRenderPipelineCameraContextualMenu : IRemoveAdditionalDataContextualMenu<Camera>
+    class UniversalRenderPipelineCameraContextualMenu : IRemoveAdditionalDataContextualMenu<Camera, UniversalAdditionalCameraData>
     {
-        //The call is delayed to the dispatcher to solve conflict with other SRP
-        public void RemoveComponent(Camera camera, IEnumerable<Component> dependencies)
-        {
-            // do not use keyword is to remove the additional data. It will not work
-            dependencies = dependencies.Where(c => c.GetType() != typeof(UniversalAdditionalCameraData));
-            if (dependencies.Any())
-            {
-                EditorUtility.DisplayDialog("Can't remove component", $"Can't remove Camera because {dependencies.First().GetType().Name} depends on it.", "Ok");
-                return;
-            }
-
-            var isAssetEditing = EditorUtility.IsPersistent(camera);
-            try
-            {
-                if (isAssetEditing)
-                {
-                    AssetDatabase.StartAssetEditing();
-                }
-                Undo.SetCurrentGroupName("Remove Universal Camera");
-                var additionalCameraData = camera.GetComponent<UniversalAdditionalCameraData>();
-                if (additionalCameraData != null)
-                {
-                    Undo.DestroyObjectImmediate(additionalCameraData);
-                }
-                Undo.DestroyObjectImmediate(camera);
-            }
-            finally
-            {
-                if (isAssetEditing)
-                {
-                    AssetDatabase.StopAssetEditing();
-                }
-            }
-        }
     }
 }

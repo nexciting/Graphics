@@ -8,6 +8,12 @@ namespace UnityEditor.Rendering.Universal
     [CustomEditorForRenderPipeline(typeof(Light), typeof(UniversalRenderPipelineAsset))]
     class UniversalRenderPipelineLightEditor : LightEditor
     {
+        [MenuItem("CONTEXT/Light/Remove Component")]
+        static void RemoveLightComponent(MenuCommand command)
+        {
+            ContextualMenuDispatcher.RemoveComponent<Light, UniversalAdditionalLightData>(command);
+        }
+
         UniversalRenderPipelineSerializedLight serializedLight { get; set; }
 
         protected override void OnEnable()
@@ -43,7 +49,8 @@ namespace UnityEditor.Rendering.Universal
             if (!(GraphicsSettings.currentRenderPipeline is UniversalRenderPipelineAsset))
                 return;
 
-            Light light = target as Light;
+            if (!(target is Light light) || light == null)
+                return;
 
             switch (light.type)
             {
@@ -87,5 +94,11 @@ namespace UnityEditor.Rendering.Universal
                     break;
             }
         }
+    }
+
+    [ScriptableRenderPipelineExtension(typeof(UniversalRenderPipelineAsset))]
+    class UniversalRenderPipelineLightContextualMenu : IRemoveAdditionalDataContextualMenu<Light, UniversalAdditionalLightData>
+    {
+
     }
 }
