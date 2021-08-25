@@ -21,4 +21,26 @@ namespace UnityEngine.Rendering
     public class AdditionalPropertyAttribute : Attribute
     {
     }
+
+    /// <summary>
+    /// Attribute to specify that a class is additional data of another component
+    /// Currently is being used for HDRP/URP additional Camera and Light data
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public class AdditionalComponentData : Attribute
+    {
+        /// <summary>
+        /// Summary the component type of is additional data
+        /// </summary>
+        public Type componentType;
+
+        /// <summary>
+        /// Constructor of the attribute
+        /// </summary>
+        /// <param name="componentType">The component type</param>
+        public AdditionalComponentData(Type componentType)
+        {
+            this.componentType = componentType;
+        }
+    }
 }

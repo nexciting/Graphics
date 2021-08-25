@@ -210,6 +210,7 @@ namespace UnityEngine.Rendering.Universal
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Camera))]
+    [AdditionalComponentData(typeof(Camera))]
     [ImageEffectAllowedInSceneView]
     [URPHelpURL("universal-additional-camera-data")]
     public class UniversalAdditionalCameraData : MonoBehaviour, ISerializationCallbackReceiver

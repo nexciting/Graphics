@@ -81,45 +81,8 @@ namespace UnityEditor.Rendering.HighDefinition
     }
 
     [ScriptableRenderPipelineExtension(typeof(HDRenderPipelineAsset))]
-    class HDCameraContextualMenu : IRemoveAdditionalDataContextualMenu<Camera>
+    class HDCameraContextualMenu
     {
-        //The call is delayed to the dispatcher to solve conflict with other SRP
-        public void RemoveComponent(Camera camera, IEnumerable<Component> dependencies)
-        {
-            // do not use keyword is to remove the additional data. It will not work
-            dependencies = dependencies.Where(c => c.GetType() != typeof(HDAdditionalCameraData));
-            if (dependencies.Count() > 0)
-            {
-                EditorUtility.DisplayDialog("Can't remove component", $"Can't remove Camera because {dependencies.First().GetType().Name} depends on it.", "Ok");
-                return;
-            }
-
-            var isAssetEditing = EditorUtility.IsPersistent(camera);
-            try
-            {
-                if (isAssetEditing)
-                {
-                    AssetDatabase.StartAssetEditing();
-                }
-
-                Undo.SetCurrentGroupName("Remove HD Camera");
-                var additionalCameraData = camera.GetComponent<HDAdditionalCameraData>();
-                if (additionalCameraData != null)
-                {
-                    Undo.DestroyObjectImmediate(additionalCameraData);
-                }
-
-                Undo.DestroyObjectImmediate(camera);
-            }
-            finally
-            {
-                if (isAssetEditing)
-                {
-                    AssetDatabase.StopAssetEditing();
-                }
-            }
-        }
-
         [MenuItem("CONTEXT/Camera/Reset", false, 0)]
         static void ResetCamera(MenuCommand menuCommand)
         {

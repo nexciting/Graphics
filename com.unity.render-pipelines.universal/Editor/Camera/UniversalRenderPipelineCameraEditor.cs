@@ -14,12 +14,6 @@ namespace UnityEditor.Rendering.Universal
     [CanEditMultipleObjects]
     class UniversalRenderPipelineCameraEditor : CameraEditor
     {
-        [MenuItem("CONTEXT/Camera/Remove Component")]
-        static void RemoveCameraComponent(MenuCommand command)
-        {
-            ContextualMenuDispatcher.RemoveComponent<Camera, UniversalAdditionalCameraData>(command);
-        }
-
         ReorderableList m_LayerList;
 
         public Camera camera => target as Camera;
@@ -507,10 +501,5 @@ namespace UnityEditor.Rendering.Universal
 
             EditorGUILayout.Space();
         }
-    }
-
-    [ScriptableRenderPipelineExtension(typeof(UniversalRenderPipelineAsset))]
-    class UniversalRenderPipelineCameraContextualMenu : IRemoveAdditionalDataContextualMenu<Camera, UniversalAdditionalCameraData>
-    {
     }
 }

@@ -1,70 +1,78 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
+using UnityEngine.Rendering;
 
 namespace UnityEditor.Rendering
 {
+    internal static class RemoveComponentUtils
+    {
+        public static IEnumerable<Component> ComponentDependencies(Component component)
+           => component.gameObject
+           .GetComponents<Component>()
+           .Where(c => c != component
+               && c.GetType()
+                   .GetCustomAttributes(typeof(RequireComponent), true)
+                   .Count(att => att is RequireComponent rc
+                       && (rc.m_Type0 == component.GetType()
+                           || rc.m_Type1 == component.GetType()
+                           || rc.m_Type2 == component.GetType())) > 0);
+
+        public static bool CanRemoveComponent(Component component, IEnumerable<Component> dependencies)
+        {
+            if (dependencies.Count() == 0)
+                return true;
+
+            Component firstDependency = dependencies.First();
+            string error = $"Can't remove {component.GetType().Name} because {firstDependency.GetType().Name} depends on it.";
+            EditorUtility.DisplayDialog("Can't remove component", error, "Ok");
+            return false;
+        }
+    }
+
     /// <summary>
     /// Helper methods for overriding contextual menus
     /// </summary>
-    public static class ContextualMenuDispatcher
+    static class ContextualMenuDispatcher
     {
-        public static void RemoveComponent<T, U>(MenuCommand command)
+        [MenuItem("CONTEXT/Light/Remove Component")]
+        static void RemoveLightComponent(MenuCommand command)
+        {
+            RemoveComponent<Light>(command);
+        }
+
+        [MenuItem("CONTEXT/Camera/Remove Component")]
+        static void RemoveCameraComponent(MenuCommand command)
+        {
+            RemoveComponent<Camera>(command);
+        }
+
+        static void RemoveComponent<T>(MenuCommand command)
             where T : Component
-            where U : Component
         {
             T comp = command.context as T;
-            string error;
 
-            if (!DispatchRemoveComponent<T, U>(comp))
+            if (!DispatchRemoveComponent<T>(comp))
             {
                 //preserve built-in behavior
-                if (CanRemoveComponent(comp, out error))
+                if (RemoveComponentUtils.CanRemoveComponent(comp, RemoveComponentUtils.ComponentDependencies(comp)))
                     Undo.DestroyObjectImmediate(command.context);
-                else
-                    EditorUtility.DisplayDialog("Can't remove component", error, "Ok");
             }
         }
 
-        static bool DispatchRemoveComponent<T, U>(T component)
+        static bool DispatchRemoveComponent<T>(T component)
             where T : Component
-            where U : Component
         {
-            Type type = RenderPipelineEditorUtility.FetchFirstCompatibleTypeUsingScriptableRenderPipelineExtension<IRemoveAdditionalDataContextualMenu<T, U>>();
-            if (type != null)
+            try
             {
-                IRemoveAdditionalDataContextualMenu<T, U> instance = (IRemoveAdditionalDataContextualMenu<T, U>)Activator.CreateInstance(type);
-                instance.RemoveComponent(component, ComponentDependencies(component));
+                IRemoveAdditionalDataContextualMenu<T> instance = new RemoveAdditionalDataContextualMenu<T>();
+                instance.RemoveComponent(component, RemoveComponentUtils.ComponentDependencies(component));
                 return true;
             }
-            return false;
-        }
-
-        static IEnumerable<Component> ComponentDependencies(Component component)
-            => component.gameObject
-            .GetComponents<Component>()
-            .Where(c => c != component
-                && c.GetType()
-                    .GetCustomAttributes(typeof(RequireComponent), true)
-                    .Count(att => att is RequireComponent rc
-                        && (rc.m_Type0 == component.GetType()
-                            || rc.m_Type1 == component.GetType()
-                            || rc.m_Type2 == component.GetType())) > 0);
-
-        static bool CanRemoveComponent(Component component, out string error)
-        {
-            var dependencies = ComponentDependencies(component);
-            if (dependencies.Count() == 0)
+            catch
             {
-                error = null;
-                return true;
+                return false;
             }
-
-            Component firstDependency = dependencies.First();
-            error = $"Can't remove {component.GetType().Name} because {firstDependency.GetType().Name} depends on it.";
-            return false;
         }
     }
 
@@ -72,7 +80,6 @@ namespace UnityEditor.Rendering
     /// Interface that should be used with [ScriptableRenderPipelineExtension(type))] attribute to dispatch ContextualMenu calls on the different SRPs
     /// </summary>
     /// <typeparam name="T">This must be a component that require AdditionalData in your SRP</typeparam>
-    [Obsolete("Use the IRemoveAdditionalDataContextualMenu<T, U> instead.")]
     public interface IRemoveAdditionalDataContextualMenu<T>
         where T : Component
     {
@@ -84,25 +91,24 @@ namespace UnityEditor.Rendering
         void RemoveComponent(T component, IEnumerable<Component> dependencies);
     }
 
-    /// <summary>
-    /// Interface that should be used with [ScriptableRenderPipelineExtension(type))] attribute to dispatch ContextualMenu calls on the different SRPs
-    /// </summary>
-    /// <typeparam name="T">This must be a component that require AdditionalData in your SRP</typeparam>
-    /// <typeparam name="U">This is the AdditionalData</typeparam>
-    public interface IRemoveAdditionalDataContextualMenu<T, U>
+    internal class RemoveAdditionalDataContextualMenu<T> : IRemoveAdditionalDataContextualMenu<T>
         where T : Component
-        where U : Component
     {
-        //The call is delayed to the dispatcher to solve conflict with other SRP
+        /// <summary>
+        /// Remove the given component
+        /// </summary>
+        /// <param name="component">The component to remove</param>
+        /// <param name="dependencies">Dependencies.</param>
         public void RemoveComponent(T component, IEnumerable<Component> dependencies)
         {
-            // do not use keyword is to remove the additional data. It will not work
-            dependencies = dependencies.Where(c => c.GetType() != typeof(U)).ToList();
-            if (dependencies.Any())
-            {
-                EditorUtility.DisplayDialog("Can't remove component", $"Can't remove {typeof(T)} because {dependencies.First().GetType().Name} depends on it.", "Ok");
+            var additionalDatas = dependencies
+                .Where(c => c != component && c.GetType()
+                    .GetCustomAttributes(typeof(AdditionalComponentData), true)
+                    .Where(att => ((AdditionalComponentData)att).componentType == component.GetType()).Any())
+                .ToList();
+
+            if (!RemoveComponentUtils.CanRemoveComponent(component, dependencies.Where(c => !additionalDatas.Contains(c))))
                 return;
-            }
 
             var isAssetEditing = EditorUtility.IsPersistent(component);
             try
@@ -111,11 +117,15 @@ namespace UnityEditor.Rendering
                 {
                     AssetDatabase.StartAssetEditing();
                 }
-                Undo.SetCurrentGroupName($"Remove {typeof(U)}");
-                var additionalDataComponent = component.GetComponent<U>();
-                if (additionalDataComponent != null)
+                Undo.SetCurrentGroupName($"Remove {typeof(T)} additional data components");
+
+                // The components with RequireComponent(typeof(T)) also contain the AdditionalData attribute, proceed with the remove
+                foreach (var additionalDataComponent in additionalDatas)
                 {
-                    Undo.DestroyObjectImmediate(additionalDataComponent);
+                    if (additionalDataComponent != null)
+                    {
+                        Undo.DestroyObjectImmediate(additionalDataComponent);
+                    }
                 }
                 Undo.DestroyObjectImmediate(component);
             }
