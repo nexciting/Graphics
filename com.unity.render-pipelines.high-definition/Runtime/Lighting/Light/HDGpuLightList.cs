@@ -103,17 +103,19 @@ namespace UnityEngine.Rendering.HighDefinition
 
         private void Allocate(int lightCount, int directionalLightCount, int viewCounts)
         {
-            if (lightCount > m_LightCapacity)
+            int requestedLightCount = Math.Max(1, lightCount);
+            if (requestedLightCount > m_LightCapacity)
             {
-                m_LightCapacity = Math.Max(Math.Max(m_LightCapacity * 2, lightCount), ArrayCapacity);
+                m_LightCapacity = Math.Max(Math.Max(m_LightCapacity * 2, requestedLightCount), ArrayCapacity);
                 m_Lights.ResizeArray(m_LightCapacity);
                 m_LightCapacity = lightCount;
             }
             m_LightCount = lightCount;
 
-            if (directionalLightCount > m_DirectionalLightCapacity)
+            int requestedDurectinalCount = Math.Max(1, directionalLightCount);
+            if (requestedDurectinalCount > m_DirectionalLightCapacity)
             {
-                m_DirectionalLightCapacity = Math.Max(Math.Max(m_DirectionalLightCapacity * 2, directionalLightCount), ArrayCapacity);
+                m_DirectionalLightCapacity = Math.Max(Math.Max(m_DirectionalLightCapacity * 2, requestedDurectinalCount), ArrayCapacity);
                 m_DirectionalLights.ResizeArray(m_DirectionalLightCapacity);
             }
             m_DirectionalLightCount = directionalLightCount;
@@ -126,9 +128,10 @@ namespace UnityEngine.Rendering.HighDefinition
             m_LightsPerViewCount = viewCounts;
 
             int totalBoundsCount = m_LightCount * viewCounts;
-            if (totalBoundsCount > m_LightBoundsCapacity)
+            int requestedBoundsCount = Math.Max(totalBoundsCount, 1);
+            if (requestedBoundsCount > m_LightBoundsCapacity)
             {
-                m_LightBoundsCapacity = Math.Max(Math.Max(m_LightBoundsCapacity * 2, totalBoundsCount), ArrayCapacity);
+                m_LightBoundsCapacity = Math.Max(Math.Max(m_LightBoundsCapacity * 2, requestedBoundsCount), ArrayCapacity);
                 m_LightBounds.ResizeArray(m_LightBoundsCapacity);
                 m_LightVolumes.ResizeArray(m_LightBoundsCapacity);
             }

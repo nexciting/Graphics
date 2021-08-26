@@ -38,8 +38,8 @@ namespace UnityEngine.Rendering.HighDefinition
             #endregion
 
             #region input light entity SoA data
-            [NativeDisableContainerSafetyRestriction]
-            public NativeArray<HDLightRenderData> lightData;
+            [ReadOnly]
+            public NativeArray<HDLightRenderData> lightRenderDataArray;
             #endregion
 
             #region input visible lights processed
@@ -76,14 +76,14 @@ namespace UnityEngine.Rendering.HighDefinition
             public NativeArray<int> gpuLightCounters;
             #endregion
 
-            private ref HDLightRenderData GetLightData(int dataIndex)
-            {
-                unsafe
-                {
-                    HDLightRenderData* data = (HDLightRenderData*)lightData.GetUnsafePtr<HDLightRenderData>() + dataIndex;
-                    return ref UnsafeUtility.AsRef<HDLightRenderData>(data);
-                }
-            }
+            //private ref HDLightRenderData GetLightData(int dataIndex)
+            //{
+            //    unsafe
+            //    {
+            //        HDLightRenderData* data = (HDLightRenderData*)lightRenderDataArray.GetUnsafePtr<HDLightRenderData>() + dataIndex;
+            //        return ref UnsafeUtility.AsRef<HDLightRenderData>(data);
+            //    }
+            //}
 
             private uint GetLightLayer(in HDLightRenderData lightRenderData)
             {
@@ -112,7 +112,8 @@ namespace UnityEngine.Rendering.HighDefinition
                 int dataIndex = processedEntity.dataIndex;
                 var lightData = new LightData();
 
-                ref HDLightRenderData lightRenderData = ref GetLightData(dataIndex);
+                //ref HDLightRenderData lightRenderData = ref GetLightData(dataIndex);
+                HDLightRenderData lightRenderData = lightRenderDataArray[dataIndex];
                 lightData.lightLayers = GetLightLayer(lightRenderData);
                 lightData.lightType = gpuLightType;
 
@@ -496,7 +497,8 @@ namespace UnityEngine.Rendering.HighDefinition
                 int dataIndex = processedEntity.dataIndex;
                 var lightData = new DirectionalLightData();
 
-                ref HDLightRenderData lightRenderData = ref GetLightData(dataIndex);
+                //ref HDLightRenderData lightRenderData = ref GetLightData(dataIndex);
+                HDLightRenderData lightRenderData = lightRenderDataArray[dataIndex];
                 lightData.lightLayers = GetLightLayer(lightRenderData);
                 // Light direction for directional is opposite to the forward direction
                 lightData.forward = light.GetForward();
@@ -636,7 +638,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 aerosolExtinctionCoefficient = skySettings.GetAerosolExtinctionCoefficient(),
 
                 // light entity SoA data
-                lightData = lightEntities.lightData,
+                lightRenderDataArray = lightEntities.lightData,
 
                 //visible lights processed
                 sortKeys = visibleLights.sortKeys,
