@@ -487,6 +487,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 m_CurrentScreenSpaceShadowData[i].valid = false;
             }
 
+            int totalLightsCount = visibleLights.sortedLightCounts;
             int lightsCount = visibleLights.sortedNonDirectionalLightCounts;
             int directionalCount = visibleLights.sortedDirectionalLightCounts;
             Allocate(lightsCount, directionalCount, hdCamera.viewCount);
@@ -494,7 +495,7 @@ namespace UnityEngine.Rendering.HighDefinition
             for (int i = 0; i < m_LightTypeCounters.Length; ++i)
                 m_LightTypeCounters[i] = 0;
 
-            if (m_LightCount > 0)
+            if (totalLightsCount > 0)
             {
                 for (int viewId = 0; viewId < hdCamera.viewCount; ++viewId)
                 {
