@@ -18,36 +18,10 @@ namespace UnityEngine.Rendering.HighDefinition
         struct ProcessVisibleLightJob : IJobParallelFor
         {
             #region Light entity SoA data
+            [NativeDisableContainerSafetyRestriction]
+            public NativeArray<HDLightRenderData> lightData;
             [ReadOnly]
             public NativeArray<float3> lightPositions;
-            [ReadOnly]
-            public NativeArray<HDAdditionalLightData.PointLightHDType> pointLightTypes;
-            [ReadOnly]
-            public NativeArray<SpotLightShape> spotLightShapes;
-            [ReadOnly]
-            public NativeArray<AreaLightShape> areaLightShapes;
-            [ReadOnly]
-            public NativeArray<float> fadeDistances;
-            [ReadOnly]
-            public NativeArray<float> volumetricFadeDistances;
-            [ReadOnly]
-            public NativeArray<bool> includeForRayTracings;
-            [ReadOnly]
-            public NativeArray<bool> useScreenSpaceShadows;
-            [ReadOnly]
-            public NativeArray<bool> useRayTracedShadows;
-            [ReadOnly]
-            public NativeArray<float> lightDimmer;
-            [ReadOnly]
-            public NativeArray<float> volumetricDimmer;
-            [ReadOnly]
-            public NativeArray<float> shadowDimmer;
-            [ReadOnly]
-            public NativeArray<float> shadowFadeDistance;
-            [ReadOnly]
-            public NativeArray<bool> affectDiffuse;
-            [ReadOnly]
-            public NativeArray<bool> affectSpecular;
             #endregion
 
             #region Visible light SoA
@@ -242,6 +216,15 @@ namespace UnityEngine.Rendering.HighDefinition
                 return flags;
             }
 
+            private ref HDLightRenderData GetLightData(int dataIndex)
+            {
+                unsafe
+                {
+                    HDLightRenderData* data = (HDLightRenderData*)lightData.GetUnsafePtr<HDLightRenderData>() + dataIndex;
+                    return ref UnsafeUtility.AsRef<HDLightRenderData>(data);
+                }
+            }
+
             public void Execute(int index)
             {
                 VisibleLight visibleLight = visibleLights[index];
@@ -252,20 +235,21 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 int dataIndex = visibleLightEntity.dataIndex;
+                ref HDLightRenderData lightRenderData = ref GetLightData(dataIndex);
 
-                if (enableRayTracing && !includeForRayTracings[dataIndex])
+                if (enableRayTracing && !lightRenderData.includeForRayTracing)
                     return;
 
-                float distanceToCamera = math.distance(cameraPosition, lightPositions[visibleLightEntity.dataIndex]);
-                var lightType = HDAdditionalLightData.TranslateLightType(visibleLight.lightType, pointLightTypes[dataIndex]);
+                float distanceToCamera = math.distance(cameraPosition, lightPositions[dataIndex]);
+                var lightType = HDAdditionalLightData.TranslateLightType(visibleLight.lightType, lightRenderData.pointLightType);
                 var lightCategory = LightCategory.Count;
                 var gpuLightType = GPULightType.Point;
-                var areaLightShape = areaLightShapes[dataIndex];
+                var areaLightShape = lightRenderData.areaLightShape;
 
                 if (!enableAreaLights && (lightType == HDLightType.Area && (areaLightShape == AreaLightShape.Rectangle || areaLightShape == AreaLightShape.Tube)))
                     return;
 
-                var spotLightShape = spotLightShapes[dataIndex];
+                var spotLightShape = lightRenderData.spotLightShape;
                 var lightVolumeType = LightVolumeType.Count;
                 var isBakedShadowMaskLight =
                     bakingOutput.lightmapBakeType == LightmapBakeType.Mixed &&
@@ -277,16 +261,16 @@ namespace UnityEngine.Rendering.HighDefinition
                 if (debugFilterMode != DebugLightFilterMode.None && debugFilterMode.IsEnabledFor(gpuLightType, spotLightShape))
                     return;
 
-                float lightDistanceFade = gpuLightType == GPULightType.Directional ? 1.0f : HDUtils.ComputeLinearDistanceFade(distanceToCamera, fadeDistances[dataIndex]);
-                float volumetricDistanceFade = gpuLightType == GPULightType.Directional ? 1.0f : HDUtils.ComputeLinearDistanceFade(distanceToCamera, volumetricFadeDistances[dataIndex]);
+                float lightDistanceFade = gpuLightType == GPULightType.Directional ? 1.0f : HDUtils.ComputeLinearDistanceFade(distanceToCamera, lightRenderData.fadeDistance);
+                float volumetricDistanceFade = gpuLightType == GPULightType.Directional ? 1.0f : HDUtils.ComputeLinearDistanceFade(distanceToCamera, lightRenderData.volumetricFadeDistance);
 
-                bool contributesToLighting = ((lightDimmer[dataIndex] > 0) && (affectDiffuse[dataIndex] || affectSpecular[dataIndex])) || (volumetricDimmer[dataIndex] > 0);
+                bool contributesToLighting = ((lightRenderData.lightDimmer > 0) && (lightRenderData.affectDiffuse || lightRenderData.affectSpecular)) || (lightRenderData.volumetricDimmer > 0);
                 contributesToLighting = contributesToLighting && (lightDistanceFade > 0);
 
                 var shadowMapFlags = EvaluateShadowState(
                     shadows, lightType, gpuLightType, areaLightShape,
-                    useScreenSpaceShadows[dataIndex], useRayTracedShadows[dataIndex],
-                    shadowDimmer[dataIndex], shadowFadeDistance[dataIndex], distanceToCamera, lightVolumeType);
+                    lightRenderData.useScreenSpaceShadows, lightRenderData.useRayTracedShadows,
+                    lightRenderData.shadowDimmer, lightRenderData.shadowFadeDistance, distanceToCamera, lightVolumeType);
 
                 if (!contributesToLighting)
                     return;
@@ -354,22 +338,9 @@ namespace UnityEngine.Rendering.HighDefinition
                 maxAreaLightsOnScreen = lightLoopSettings.maxAreaLightsOnScreen,
                 debugFilterMode = debugDisplaySettings.GetDebugLightFilterMode(),
 
-                //SoA of all light entities.
+                //render light entities.
+                lightData = lightEntityCollection.lightData,
                 lightPositions = lightEntityCollection.lightPositions,
-                pointLightTypes = lightEntityCollection.pointLightTypes,
-                spotLightShapes = lightEntityCollection.spotLightShapes,
-                areaLightShapes = lightEntityCollection.areaLightShapes,
-                fadeDistances = lightEntityCollection.fadeDistances,
-                volumetricFadeDistances = lightEntityCollection.volumetricFadeDistances,
-                includeForRayTracings = lightEntityCollection.includeForRayTracings,
-                useScreenSpaceShadows = lightEntityCollection.useScreenSpaceShadows,
-                useRayTracedShadows = lightEntityCollection.useRayTracedShadows,
-                lightDimmer = lightEntityCollection.lightDimmer,
-                volumetricDimmer = lightEntityCollection.volumetricDimmer,
-                shadowDimmer = lightEntityCollection.shadowDimmer,
-                shadowFadeDistance = lightEntityCollection.shadowFadeDistance,
-                affectDiffuse = lightEntityCollection.affectDiffuse,
-                affectSpecular = lightEntityCollection.affectSpecular,
 
                 //SoA of all visible light entities.
                 visibleLights = visibleLights,

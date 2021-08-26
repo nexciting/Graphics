@@ -526,8 +526,8 @@ namespace UnityEngine.Rendering.HighDefinition
                 processedLightEntity.gpuLightType = gpuLightType;
                 processedLightEntity.lightType = additionalLightData.type;
                 processedLightEntity.distanceToCamera = (lightEntities.lightTransforms[lightIdx].position - hdCamera.camera.transform.position).magnitude;
-                processedLightEntity.lightDistanceFade = HDUtils.ComputeLinearDistanceFade(processedLightEntity.distanceToCamera, lightEntities.fadeDistances[lightIdx]);
-                processedLightEntity.lightVolumetricDistanceFade = HDUtils.ComputeLinearDistanceFade(processedLightEntity.distanceToCamera, lightEntities.volumetricFadeDistances[lightIdx]);
+                processedLightEntity.lightDistanceFade = HDUtils.ComputeLinearDistanceFade(processedLightEntity.distanceToCamera, lightEntities.GetLightData(lightIdx).fadeDistance);
+                processedLightEntity.lightVolumetricDistanceFade = HDUtils.ComputeLinearDistanceFade(processedLightEntity.distanceToCamera, lightEntities.GetLightData(lightIdx).volumetricFadeDistance);
                 processedLightEntity.isBakedShadowMask = HDRenderPipeline.IsBakedShadowMaskLight(lightComponent);
 
                 // Build a visible light

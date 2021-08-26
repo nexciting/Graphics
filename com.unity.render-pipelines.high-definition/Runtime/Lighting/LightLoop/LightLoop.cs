@@ -1140,7 +1140,8 @@ namespace UnityEngine.Rendering.HighDefinition
         {
             var lightData = new DirectionalLightData();
             GPULightType gpuLightType = processedLightEntity.gpuLightType;
-            var lightLayer = (uint)lightEntities.lightLayers[processedLightEntity.dataIndex];
+            ref HDLightRenderData lightRenderData = ref lightEntities.GetLightData(processedLightEntity.dataIndex);
+            var lightLayer = (uint)lightRenderData.lightLayer;
             lightLayer = lightLayer < 0 ? (uint)LightLayerEnum.Everything : (uint)lightLayer;
             lightData.lightLayers = hdCamera.frameSettings.IsEnabled(FrameSettingsField.LightLayers) ? lightLayer : uint.MaxValue;
 
@@ -1152,10 +1153,10 @@ namespace UnityEngine.Rendering.HighDefinition
             // So we expect that all light with additionalData == HDUtils.s_DefaultHDAdditionalLightData are currently the one from the preview, light in scene MUST have additionalData
             lightData.color *= (HDUtils.s_DefaultHDAdditionalLightData == additionalLightData) ? Mathf.PI : 1.0f;
 
-            lightData.lightDimmer = lightEntities.lightDimmer[processedLightEntity.dataIndex];
-            lightData.diffuseDimmer = lightEntities.affectDiffuse[processedLightEntity.dataIndex] ? lightData.lightDimmer : 0;
-            lightData.specularDimmer = lightEntities.affectSpecular[processedLightEntity.dataIndex] ? lightData.lightDimmer * hdCamera.frameSettings.specularGlobalDimmer : 0;
-            lightData.volumetricLightDimmer = lightEntities.volumetricDimmer[processedLightEntity.dataIndex];
+            lightData.lightDimmer = lightRenderData.lightDimmer;
+            lightData.diffuseDimmer = lightRenderData.affectDiffuse ? lightData.lightDimmer : 0;
+            lightData.specularDimmer = lightRenderData.affectSpecular ? lightData.lightDimmer * hdCamera.frameSettings.specularGlobalDimmer : 0;
+            lightData.volumetricLightDimmer = lightRenderData.volumetricDimmer;
 
             lightData.shadowIndex = shadowIndex;
             lightData.screenSpaceShadowIndex = (int)LightDefinitions.s_InvalidScreenSpaceShadow;
@@ -1169,7 +1170,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 {
                     lightData.screenSpaceShadowIndex = screenSpaceShadowslot;
                     bool willRenderRtShadows = (shadowFlags & HDVisibleLightEntities.ShadowMapFlags.WillRenderRayTracedShadow) != 0;
-                    if (lightEntities.colorShadow[processedLightEntity.dataIndex] && willRenderRtShadows)
+                    if (lightRenderData.colorShadow && willRenderRtShadows)
                     {
                         screenSpaceShadowslot += 3;
                         lightData.screenSpaceShadowIndex |= (int)LightDefinitions.s_ScreenSpaceColorShadowFlag;
@@ -1244,8 +1245,8 @@ namespace UnityEngine.Rendering.HighDefinition
                 lightData.surfaceTextureScaleOffset = m_TextureCaches.lightCookieManager.Fetch2DCookie(cmd, additionalLightData.surfaceTexture);
             }
 
-            lightData.shadowDimmer = lightEntities.shadowDimmer[processedLightEntity.dataIndex];
-            lightData.volumetricShadowDimmer = lightEntities.volumetricShadowDimmer[processedLightEntity.dataIndex];
+            lightData.shadowDimmer = lightRenderData.shadowDimmer;
+            lightData.volumetricShadowDimmer = lightRenderData.volumetricShadowDimmer;
             GetContactShadowMask(additionalLightData, HDAdditionalLightData.ScalableSettings.UseContactShadow(m_Asset), hdCamera, isRasterization: true, ref lightData.contactShadowMask, ref lightData.isRayTracedContactShadow);
 
             // We want to have a colored penumbra if the flag is on and the color is not gray
@@ -1328,6 +1329,7 @@ namespace UnityEngine.Rendering.HighDefinition
             HDLightType lightType = processedLightEntity.lightType;
 
             var visibleLightAxisAndPosition = light.GetAxisAndPosition();
+            ref HDLightRenderData lightRenderData = ref lightEntities.GetLightData(processedLightEntity.dataIndex);
             lightData.lightLayers = hdCamera.frameSettings.IsEnabled(FrameSettingsField.LightLayers) ? additionalLightData.GetLightLayers() : uint.MaxValue;
 
             lightData.lightType = gpuLightType;
@@ -1461,11 +1463,11 @@ namespace UnityEngine.Rendering.HighDefinition
 
             var lightDistanceFade = processedLightEntity.lightDistanceFade;
             var lightVolumetricDistanceFade = processedLightEntity.lightVolumetricDistanceFade;
-            var lightDimmer = lightEntities.lightDimmer[processedLightEntity.dataIndex];
-            var volumetricDimmer = lightEntities.volumetricDimmer[processedLightEntity.dataIndex];
+            var lightDimmer = lightRenderData.lightDimmer;
+            var volumetricDimmer = lightRenderData.volumetricDimmer;
             lightData.lightDimmer = lightDistanceFade * lightDimmer;
-            lightData.diffuseDimmer = lightDistanceFade * (lightEntities.affectDiffuse[processedLightEntity.dataIndex] ? lightDimmer : 0);
-            lightData.specularDimmer = lightDistanceFade * (lightEntities.affectSpecular[processedLightEntity.dataIndex] ? lightDimmer * hdCamera.frameSettings.specularGlobalDimmer : 0);
+            lightData.diffuseDimmer = lightDistanceFade * (lightRenderData.affectDiffuse ? lightDimmer : 0);
+            lightData.specularDimmer = lightDistanceFade * (lightRenderData.affectSpecular ? lightDimmer * hdCamera.frameSettings.specularGlobalDimmer : 0);
             lightData.volumetricLightDimmer = Mathf.Min(lightVolumetricDistanceFade, lightDistanceFade) * volumetricDimmer;
 
             lightData.cookieMode = CookieMode.None;
@@ -1536,9 +1538,9 @@ namespace UnityEngine.Rendering.HighDefinition
             }
 
             var distanceToCamera = processedLightEntity.distanceToCamera;
-            var lightsShadowFadeDistance = lightEntities.shadowFadeDistance[processedLightEntity.dataIndex];
-            var shadowDimmer = lightEntities.shadowDimmer[processedLightEntity.dataIndex];
-            var volumetricShadowDimmer = lightEntities.volumetricShadowDimmer[processedLightEntity.dataIndex];
+            var lightsShadowFadeDistance = lightRenderData.shadowFadeDistance;
+            var shadowDimmer = lightRenderData.shadowDimmer;
+            var volumetricShadowDimmer = lightRenderData.volumetricShadowDimmer;
             float shadowDistanceFade = HDUtils.ComputeLinearDistanceFade(distanceToCamera, Mathf.Min(shadowSettings.maxShadowDistance.value, lightsShadowFadeDistance));
             lightData.shadowDimmer = shadowDistanceFade * shadowDimmer;
             lightData.volumetricShadowDimmer = shadowDistanceFade * volumetricShadowDimmer;

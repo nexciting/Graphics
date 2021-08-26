@@ -197,7 +197,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 m_InnerSpotPercent = Mathf.Clamp(value, k_MinSpotInnerPercent, k_MaxSpotInnerPercent);
                 UpdateLightIntensity();
-                HDLightEntityCollection.instance.UpdateInnerSpotPercent(lightEntity, m_InnerSpotPercent);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).innerSpotPercent = m_InnerSpotPercent;
             }
         }
 
@@ -222,7 +222,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_SpotIESCutoffPercent = Mathf.Clamp(value, k_MinSpotInnerPercent, k_MaxSpotInnerPercent);
-                HDLightEntityCollection.instance.UpdateSpotIESCutoffPercent(lightEntity, m_SpotIESCutoffPercent);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).spotIESCutoffPercent = m_SpotIESCutoffPercent;
             }
         }
 
@@ -245,7 +245,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 if (m_LightDimmer == value)
                     return;
 
-                HDLightEntityCollection.instance.UpdateLightDimmer(lightEntity, m_LightDimmer);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).lightDimmer = m_LightDimmer;
                 m_LightDimmer = Mathf.Clamp(value, 0.0f, 16.0f);
             }
         }
@@ -264,7 +264,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_VolumetricDimmer = Mathf.Clamp(value, 0.0f, 16.0f);
-                HDLightEntityCollection.instance.UpdateVolumetricDimmer(lightEntity, m_VolumetricDimmer);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).volumetricDimmer = m_VolumetricDimmer;
             }
         }
 
@@ -311,7 +311,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_FadeDistance = Mathf.Clamp(value, 0, float.MaxValue);
-                HDLightEntityCollection.instance.UpdateFadeDistance(lightEntity, m_FadeDistance);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).fadeDistance = m_FadeDistance;
             }
         }
 
@@ -330,7 +330,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_VolumetricFadeDistance = Mathf.Clamp(value, 0, float.MaxValue);
-                HDLightEntityCollection.instance.UpdateVolumetricFadeDistance(lightEntity, m_VolumetricFadeDistance);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).volumetricFadeDistance = m_VolumetricFadeDistance;
             }
         }
 
@@ -348,7 +348,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_AffectDiffuse = value;
-                HDLightEntityCollection.instance.UpdateAffectDiffuse(lightEntity, m_AffectDiffuse);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).affectDiffuse = m_AffectDiffuse;
             }
         }
 
@@ -366,7 +366,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_AffectSpecular = value;
-                HDLightEntityCollection.instance.UpdateAffectSpecular(lightEntity, m_AffectSpecular);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).affectSpecular = m_AffectSpecular;
             }
         }
 
@@ -408,7 +408,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 else
                     m_ShapeWidth = Mathf.Clamp(value, 0, float.MaxValue);
                 UpdateAllLightValues();
-                HDLightEntityCollection.instance.UpdateShapeWidth(lightEntity, m_ShapeWidth);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).shapeWidth = m_ShapeWidth;
             }
         }
 
@@ -431,7 +431,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 else
                     m_ShapeHeight = Mathf.Clamp(value, 0, float.MaxValue);
                 UpdateAllLightValues();
-                HDLightEntityCollection.instance.UpdateShapeHeight(lightEntity, m_ShapeHeight);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).shapeHeight = m_ShapeHeight;
             }
         }
 
@@ -451,7 +451,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 m_AspectRatio = Mathf.Clamp(value, k_MinAspectRatio, k_MaxAspectRatio);
                 UpdateAllLightValues();
-                HDLightEntityCollection.instance.UpdateAspectRatio(lightEntity, m_AspectRatio);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).aspectRatio = m_AspectRatio;
             }
         }
 
@@ -471,7 +471,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 m_ShapeRadius = Mathf.Clamp(value, 0, float.MaxValue);
                 UpdateAllLightValues();
-                HDLightEntityCollection.instance.UpdateShapeRadius(lightEntity, m_ShapeRadius);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).shapeRadius = m_ShapeRadius;
             }
         }
 
@@ -566,7 +566,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 m_ApplyRangeAttenuation = value;
                 UpdateAllLightValues();
-                HDLightEntityCollection.instance.UpdateApplyRangeAttenuation(lightEntity, m_ApplyRangeAttenuation);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).applyRangeAttenuation = m_ApplyRangeAttenuation;
             }
         }
 
@@ -672,7 +672,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 if (m_IncludeForRayTracing == value)
                     return;
 
-                HDLightEntityCollection.instance.UpdateIncludeForRayTracing(lightEntity, m_IncludeForRayTracing);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).includeForRayTracing = m_IncludeForRayTracing;
                 UpdateAllLightValues();
             }
         }
@@ -711,7 +711,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_UseScreenSpaceShadows = value;
-                HDLightEntityCollection.instance.UpdateUseScreenSpaceShadows(lightEntity, m_UseScreenSpaceShadows);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).useScreenSpaceShadows = m_UseScreenSpaceShadows;
             }
         }
 
@@ -731,7 +731,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_InteractsWithSky = value;
-                HDLightEntityCollection.instance.UpdateInteractsWithSky(lightEntity, m_InteractsWithSky);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).interactsWithSky = m_InteractsWithSky;
             }
         }
         [SerializeField, FormerlySerializedAs("angularDiameter")]
@@ -749,7 +749,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_AngularDiameter = value; // Serialization code clamps
-                HDLightEntityCollection.instance.UpdateAngularDiameter(lightEntity, m_AngularDiameter);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).angularDiameter = m_AngularDiameter;
             }
         }
 
@@ -767,7 +767,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_FlareSize = value; // Serialization code clamps
-                HDLightEntityCollection.instance.UpdateFlareSize(lightEntity, m_FlareSize);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).flareSize = m_FlareSize;
             }
         }
 
@@ -785,7 +785,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_FlareTint = value;
-                HDLightEntityCollection.instance.UpdateFlareTint(lightEntity, m_FlareTint);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).flareTint = m_FlareTint;
             }
         }
 
@@ -803,7 +803,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_FlareFalloff = value; // Serialization code clamps
-                HDLightEntityCollection.instance.UpdateFlareFalloff(lightEntity, m_FlareFalloff);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).flareFalloff = m_FlareFalloff;
             }
         }
 
@@ -838,7 +838,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_SurfaceTint = value;
-                HDLightEntityCollection.instance.UpdateSurfaceTint(lightEntity, m_SurfaceTint);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).surfaceTint = m_SurfaceTint;
             }
         }
 
@@ -856,7 +856,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_Distance = value; // Serialization code clamps
-                HDLightEntityCollection.instance.UpdateDistance(lightEntity, m_Distance);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).distance = m_Distance;
             }
         }
 
@@ -874,7 +874,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_UseRayTracedShadows = value;
-                HDLightEntityCollection.instance.UpdateUseRayTracedShadows(lightEntity, m_UseRayTracedShadows);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).useRayTracedShadows = m_UseRayTracedShadows;
             }
         }
 
@@ -997,7 +997,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_ColorShadow = value;
-                HDLightEntityCollection.instance.UpdateColorShadow(lightEntity, m_ColorShadow);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).colorShadow = m_ColorShadow;
             }
         }
 
@@ -1104,7 +1104,7 @@ namespace UnityEngine.Rendering.HighDefinition
             {
                 m_LightlayersMask = value;
 
-                HDLightEntityCollection.instance.UpdateLightLayer(lightEntity, m_LightlayersMask);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).lightLayer = m_LightlayersMask;
 
                 if (linkShadowLayers)
                     legacyLight.renderingLayerMask = LightLayerToRenderingLayerMask((int)m_LightlayersMask, legacyLight.renderingLayerMask);
@@ -1326,7 +1326,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_ShadowDimmer = Mathf.Clamp01(value);
-                HDLightEntityCollection.instance.UpdateShadowDimmer(lightEntity, m_ShadowDimmer);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).shadowDimmer = m_ShadowDimmer;
             }
         }
 
@@ -1345,7 +1345,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_VolumetricShadowDimmer = Mathf.Clamp01(value);
-                HDLightEntityCollection.instance.UpdateVolumetricShadowDimmer(lightEntity, m_VolumetricShadowDimmer);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).volumetricShadowDimmer = m_VolumetricShadowDimmer;
             }
         }
 
@@ -1363,7 +1363,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_ShadowFadeDistance = Mathf.Clamp(value, 0, float.MaxValue);
-                HDLightEntityCollection.instance.UpdateShadowFadeDistance(lightEntity, m_ShadowFadeDistance);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).shadowFadeDistance = m_ShadowFadeDistance;
             }
         }
 
@@ -1408,7 +1408,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_ShadowTint = value;
-                HDLightEntityCollection.instance.UpdateShadowTint(lightEntity, m_ShadowTint);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).shadowTint = m_ShadowTint;
             }
         }
 
@@ -1426,7 +1426,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     return;
 
                 m_PenumbraTint = value;
-                HDLightEntityCollection.instance.UpdatePenumbraTint(lightEntity, m_PenumbraTint);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).penumbraTint = m_PenumbraTint;
             }
         }
 
@@ -1586,7 +1586,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 m_BarnDoorAngle = Mathf.Clamp(value, 0.0f, 90.0f);
                 UpdateAllLightValues();
-                HDLightEntityCollection.instance.UpdateBarnDoorAngle(lightEntity, m_BarnDoorAngle);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).barnDoorAngle = m_BarnDoorAngle;
             }
         }
 
@@ -1606,7 +1606,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 m_BarnDoorLength = Mathf.Clamp(value, 0.0f, float.MaxValue);
                 UpdateAllLightValues();
-                HDLightEntityCollection.instance.UpdateBarnDoorLength(lightEntity, m_BarnDoorLength);
+                HDLightEntityCollection.instance.GetLightData(lightEntity).barnDoorLength = m_BarnDoorLength;
             }
         }
 
@@ -3475,48 +3475,58 @@ namespace UnityEngine.Rendering.HighDefinition
             ? ShadowMapType.PunctualAtlas
             : ShadowMapType.CascadedDirectional;
 
+
+        internal void UpdateRenderEntity()
+        {
+            HDLightEntityCollection lightEntities = HDLightEntityCollection.instance;
+            ref HDLightRenderData lightRenderData = ref lightEntities.GetLightData(lightEntity);
+            lightRenderData.pointLightType = m_PointlightHDType;
+            lightRenderData.spotLightShape = m_SpotLightShape;
+            lightRenderData.areaLightShape = m_AreaLightShape;
+            lightRenderData.lightLayer = m_LightLayers;
+            lightRenderData.fadeDistance = m_FadeDistance;
+            lightRenderData.distance = m_Distance;
+            lightRenderData.angularDiameter = m_AngularDiameter;
+            lightRenderData.volumetricFadeDistance = m_VolumetricFadeDistance;
+            lightRenderData.includeForRayTracing = m_IncludeForRayTracing;
+            lightRenderData.useScreenSpaceShadows = m_UseScreenSpaceShadows;
+            lightRenderData.useRayTracedShadows = m_UseRayTracedShadows;
+            lightRenderData.colorShadow = m_ColorShadow;
+            lightRenderData.lightDimmer = m_LightDimmer;
+            lightRenderData.volumetricDimmer = m_VolumetricDimmer;
+            lightRenderData.shadowDimmer = m_ShadowDimmer;
+            lightRenderData.shadowFadeDistance = m_ShadowFadeDistance;
+            lightRenderData.volumetricShadowDimmer = m_VolumetricShadowDimmer;
+            lightRenderData.shapeWidth = m_ShapeWidth;
+            lightRenderData.shapeHeight = m_ShapeHeight;
+            lightRenderData.flareSize = m_FlareSize;
+            lightRenderData.flareFalloff = m_FlareFalloff;
+            lightRenderData.aspectRatio = m_AspectRatio;
+            lightRenderData.innerSpotPercent = m_InnerSpotPercent;
+            lightRenderData.spotIESCutoffPercent = m_SpotIESCutoffPercent;
+            lightRenderData.shapeRadius = m_ShapeRadius;
+            lightRenderData.barnDoorLength = m_BarnDoorLength;
+            lightRenderData.barnDoorAngle = m_BarnDoorAngle;
+            lightRenderData.affectDiffuse = m_AffectDiffuse;
+            lightRenderData.affectSpecular = m_AffectSpecular;
+            lightRenderData.applyRangeAttenuation = m_ApplyRangeAttenuation;
+            lightRenderData.penumbraTint = m_PenumbraTint;
+            lightRenderData.interactsWithSky = m_InteractsWithSky;
+            lightRenderData.surfaceTint = m_SurfaceTint;
+            lightRenderData.shadowTint = m_ShadowTint;
+            lightRenderData.flareTint = m_FlareTint;
+        }
+
         internal void CreateHDLightEntity()
         {
             Assert.IsFalse(lightEntity.valid);
             HDLightEntityCollection lightEntities = HDLightEntityCollection.instance;
             lightEntity = lightEntities.CreateEntity(legacyLight.GetInstanceID(), transform);
+
             lightEntities.UpdateHDAdditionalLightData(lightEntity, this);//TODO: only added for shadow calculations. To be removed at some point.
             lightEntities.UpdateAOVGameObject(lightEntity, legacyLight.gameObject);
-            lightEntities.UpdatePointLightType(lightEntity, m_PointlightHDType);
-            lightEntities.UpdateSpotLightShape(lightEntity, m_SpotLightShape);
-            lightEntities.UpdateAreaLightShape(lightEntity, m_AreaLightShape);
-            lightEntities.UpdateLightLayer(lightEntity, m_LightLayers);
-            lightEntities.UpdateFadeDistance(lightEntity, m_FadeDistance);
-            lightEntities.UpdateDistance(lightEntity, m_Distance);
-            lightEntities.UpdateAngularDiameter(lightEntity, m_AngularDiameter);
-            lightEntities.UpdateVolumetricFadeDistance(lightEntity, m_VolumetricFadeDistance);
-            lightEntities.UpdateIncludeForRayTracing(lightEntity, m_IncludeForRayTracing);
-            lightEntities.UpdateUseScreenSpaceShadows(lightEntity, m_UseScreenSpaceShadows);
-            lightEntities.UpdateUseRayTracedShadows(lightEntity, m_UseRayTracedShadows);
-            lightEntities.UpdateColorShadow(lightEntity, m_ColorShadow);
-            lightEntities.UpdateLightDimmer(lightEntity, m_LightDimmer);
-            lightEntities.UpdateVolumetricDimmer(lightEntity, m_VolumetricDimmer);
-            lightEntities.UpdateShadowDimmer(lightEntity, m_ShadowDimmer);
-            lightEntities.UpdateShadowFadeDistance(lightEntity, m_ShadowFadeDistance);
-            lightEntities.UpdateVolumetricShadowDimmer(lightEntity, m_VolumetricShadowDimmer);
-            lightEntities.UpdateShapeWidth(lightEntity, m_ShapeWidth);
-            lightEntities.UpdateShapeHeight(lightEntity, m_ShapeHeight);
-            lightEntities.UpdateFlareSize(lightEntity, m_FlareSize);
-            lightEntities.UpdateFlareFalloff(lightEntity, m_FlareFalloff);
-            lightEntities.UpdateAspectRatio(lightEntity, m_AspectRatio);
-            lightEntities.UpdateInnerSpotPercent(lightEntity, m_InnerSpotPercent);
-            lightEntities.UpdateSpotIESCutoffPercent(lightEntity, m_SpotIESCutoffPercent);
-            lightEntities.UpdateShapeRadius(lightEntity, m_ShapeRadius);
-            lightEntities.UpdateBarnDoorLength(lightEntity, m_BarnDoorLength);
-            lightEntities.UpdateBarnDoorAngle(lightEntity, m_BarnDoorAngle);
-            lightEntities.UpdateAffectDiffuse(lightEntity, m_AffectDiffuse);
-            lightEntities.UpdateAffectSpecular(lightEntity, m_AffectSpecular);
-            lightEntities.UpdateApplyRangeAttenuation(lightEntity, m_ApplyRangeAttenuation);
-            lightEntities.UpdatePenumbraTint(lightEntity, m_PenumbraTint);
-            lightEntities.UpdateInteractsWithSky(lightEntity, m_InteractsWithSky);
-            lightEntities.UpdateSurfaceTint(lightEntity, m_SurfaceTint);
-            lightEntities.UpdateShadowTint(lightEntity, m_ShadowTint);
-            lightEntities.UpdateFlareTint(lightEntity, m_FlareTint);
+
+            UpdateRenderEntity();
         }
 
         void OnEnable()

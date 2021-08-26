@@ -38,58 +38,8 @@ namespace UnityEngine.Rendering.HighDefinition
             #endregion
 
             #region input light entity SoA data
-            [ReadOnly]
-            public NativeArray<LightLayerEnum> lightLayers;
-            [ReadOnly]
-            public NativeArray<float> lightDimmer;
-            [ReadOnly]
-            public NativeArray<float> volumetricDimmer;
-            [ReadOnly]
-            public NativeArray<float> shadowDimmer;
-            [ReadOnly]
-            public NativeArray<bool> affectDiffuse;
-            [ReadOnly]
-            public NativeArray<bool> affectSpecular;
-            [ReadOnly]
-            public NativeArray<bool> applyRangeAttenuation;
-            [ReadOnly]
-            public NativeArray<float> shadowFadeDistance;
-            [ReadOnly]
-            public NativeArray<float> distance;
-            [ReadOnly]
-            public NativeArray<float> angularDiameter;
-            [ReadOnly]
-            public NativeArray<float> volumetricShadowDimmer;
-            [ReadOnly]
-            public NativeArray<float> shapeWidth;
-            [ReadOnly]
-            public NativeArray<float> shapeHeight;
-            [ReadOnly]
-            public NativeArray<float> aspectRatio;
-            [ReadOnly]
-            public NativeArray<float> innerSpotPercent;
-            [ReadOnly]
-            public NativeArray<float> spotIESCutoffPercent;
-            [ReadOnly]
-            public NativeArray<float> shapeRadius;
-            [ReadOnly]
-            public NativeArray<float> barnDoorLength;
-            [ReadOnly]
-            public NativeArray<float> barnDoorAngle;
-            [ReadOnly]
-            public NativeArray<float> flareSize;
-            [ReadOnly]
-            public NativeArray<float> flareFalloff;
-            [ReadOnly]
-            public NativeArray<bool> penumbraTint;
-            [ReadOnly]
-            public NativeArray<bool> interactsWithSky;
-            [ReadOnly]
-            public NativeArray<Color> surfaceTint;
-            [ReadOnly]
-            public NativeArray<Color> shadowTint;
-            [ReadOnly]
-            public NativeArray<Color> flareTint;
+            [NativeDisableContainerSafetyRestriction]
+            public NativeArray<HDLightRenderData> lightData;
             #endregion
 
             #region input visible lights processed
@@ -126,9 +76,18 @@ namespace UnityEngine.Rendering.HighDefinition
             public NativeArray<int> gpuLightCounters;
             #endregion
 
-            private uint GetLightLayer(int dataIndex)
+            private ref HDLightRenderData GetLightData(int dataIndex)
             {
-                int lightLayerMaskValue = (int)lightLayers[dataIndex];
+                unsafe
+                {
+                    HDLightRenderData* data = (HDLightRenderData*)lightData.GetUnsafePtr<HDLightRenderData>() + dataIndex;
+                    return ref UnsafeUtility.AsRef<HDLightRenderData>(data);
+                }
+            }
+
+            private uint GetLightLayer(in HDLightRenderData lightRenderData)
+            {
+                int lightLayerMaskValue = (int)lightRenderData.lightLayer;
                 uint lightLayerValue = lightLayerMaskValue < 0 ? (uint)LightLayerEnum.Everything : (uint)lightLayerMaskValue;
                 return lightLayersEnabled ? lightLayerValue : uint.MaxValue;
             }
@@ -153,14 +112,15 @@ namespace UnityEngine.Rendering.HighDefinition
                 int dataIndex = processedEntity.dataIndex;
                 var lightData = new LightData();
 
-                lightData.lightLayers = GetLightLayer(dataIndex);
+                ref HDLightRenderData lightRenderData = ref GetLightData(dataIndex);
+                lightData.lightLayers = GetLightLayer(lightRenderData);
                 lightData.lightType = gpuLightType;
 
                 var visibleLightAxisAndPosition = light.GetAxisAndPosition();
                 lightData.positionRWS = visibleLightAxisAndPosition.Position;
                 lightData.range = light.range;
 
-                if (applyRangeAttenuation[dataIndex])
+                if (lightRenderData.applyRangeAttenuation)
                 {
                     lightData.rangeAttenuationScale = 1.0f / (light.range * light.range);
                     lightData.rangeAttenuationBias = 1.0f;
@@ -190,8 +150,8 @@ namespace UnityEngine.Rendering.HighDefinition
                     }
                 }
 
-                float shapeWidthVal = shapeWidth[dataIndex];
-                float shapeHeightVal = shapeHeight[dataIndex];
+                float shapeWidthVal = lightRenderData.shapeWidth;
+                float shapeHeightVal = lightRenderData.shapeHeight;
                 lightData.color = GetLightColor(light);
                 lightData.forward = visibleLightAxisAndPosition.Forward;
                 lightData.up = visibleLightAxisAndPosition.Up;
@@ -214,7 +174,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 {
                     // Get width and height for the current frustum
                     var spotAngle = light.spotAngle;
-                    float aspectRatioValue = aspectRatio[dataIndex];
+                    float aspectRatioValue = lightRenderData.aspectRatio;
 
                     float frustumWidth, frustumHeight;
 
@@ -242,7 +202,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 {
                     var spotAngle = light.spotAngle;
 
-                    var innerConePercent = innerSpotPercent[dataIndex] / 100.0f;
+                    var innerConePercent = lightRenderData.innerSpotPercent / 100.0f;
                     var cosSpotOuterHalfAngle = Mathf.Clamp(Mathf.Cos(spotAngle * 0.5f * Mathf.Deg2Rad), 0.0f, 1.0f);
                     var sinSpotOuterHalfAngle = Mathf.Sqrt(1.0f - cosSpotOuterHalfAngle * cosSpotOuterHalfAngle);
                     var cosSpotInnerHalfAngle = Mathf.Clamp(Mathf.Cos(spotAngle * 0.5f * innerConePercent * Mathf.Deg2Rad), 0.0f, 1.0f); // inner cone
@@ -250,7 +210,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     var val = Mathf.Max(0.0001f, (cosSpotInnerHalfAngle - cosSpotOuterHalfAngle));
                     lightData.angleScale = 1.0f / val;
                     lightData.angleOffset = -cosSpotOuterHalfAngle * lightData.angleScale;
-                    lightData.iesCut = spotIESCutoffPercent[dataIndex] / 100.0f;
+                    lightData.iesCut = lightRenderData.spotIESCutoffPercent / 100.0f;
 
                     // Rescale for cookies and windowing.
                     float cotOuterHalfAngle = cosSpotOuterHalfAngle / sinSpotOuterHalfAngle;
@@ -265,7 +225,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     lightData.iesCut = 1.0f;
                 }
 
-                float shapeRadiusVal = shapeRadius[dataIndex];
+                float shapeRadiusVal = lightRenderData.shapeRadius;
                 if (lightData.lightType != GPULightType.Directional && lightData.lightType != GPULightType.ProjectorBox)
                 {
                     // Store the squared radius of the light to simulate a fill light.
@@ -274,14 +234,14 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 if (lightData.lightType == GPULightType.Rectangle || lightData.lightType == GPULightType.Tube)
                 {
-                    lightData.size = new Vector4(shapeWidthVal, shapeHeightVal, Mathf.Cos(barnDoorAngle[dataIndex] * Mathf.PI / 180.0f), barnDoorLength[dataIndex]);
+                    lightData.size = new Vector4(shapeWidthVal, shapeHeightVal, Mathf.Cos(lightRenderData.barnDoorAngle * Mathf.PI / 180.0f), lightRenderData.barnDoorLength);
                 }
 
-                var lightDimmerVal = lightDimmer[dataIndex];
+                var lightDimmerVal = lightRenderData.lightDimmer;
                 lightData.lightDimmer = processedEntity.lightDistanceFade * lightDimmerVal;
-                lightData.diffuseDimmer = processedEntity.lightDistanceFade * (affectDiffuse[dataIndex] ? lightDimmerVal : 0);
-                lightData.specularDimmer = processedEntity.lightDistanceFade * (affectSpecular[dataIndex] ? lightDimmerVal * specularGlobalDimmer : 0);
-                lightData.volumetricLightDimmer = Mathf.Min(processedEntity.lightVolumetricDistanceFade, processedEntity.lightDistanceFade) * volumetricDimmer[dataIndex];
+                lightData.diffuseDimmer = processedEntity.lightDistanceFade * (lightRenderData.affectDiffuse ? lightDimmerVal : 0);
+                lightData.specularDimmer = processedEntity.lightDistanceFade * (lightRenderData.affectSpecular ? lightDimmerVal * specularGlobalDimmer : 0);
+                lightData.volumetricLightDimmer = Mathf.Min(processedEntity.lightVolumetricDistanceFade, processedEntity.lightDistanceFade) * lightRenderData.volumetricDimmer;
 
                 lightData.cookieMode = CookieMode.None;
                 lightData.shadowIndex = -1;
@@ -289,16 +249,16 @@ namespace UnityEngine.Rendering.HighDefinition
                 lightData.isRayTracedContactShadow = 0.0f;
 
                 var distanceToCamera = processedEntity.distanceToCamera;
-                var lightsShadowFadeDistance = shadowFadeDistance[dataIndex];
-                var shadowDimmerVal = shadowDimmer[dataIndex];
-                var volumetricShadowDimmerVal = volumetricShadowDimmer[dataIndex];
+                var lightsShadowFadeDistance = lightRenderData.shadowFadeDistance;
+                var shadowDimmerVal = lightRenderData.shadowDimmer;
+                var volumetricShadowDimmerVal = lightRenderData.volumetricShadowDimmer;
                 float shadowDistanceFade = HDUtils.ComputeLinearDistanceFade(distanceToCamera, Mathf.Min(maxShadowFadeDistance, lightsShadowFadeDistance));
                 lightData.shadowDimmer = shadowDistanceFade * shadowDimmerVal;
                 lightData.volumetricShadowDimmer = shadowDistanceFade * volumetricShadowDimmerVal;
 
                 // We want to have a colored penumbra if the flag is on and the color is not gray
-                var shadowTintVal = shadowTint[dataIndex];
-                bool penumbraTintVal = penumbraTint[dataIndex] && ((shadowTintVal.r != shadowTintVal.g) || (shadowTintVal.g != shadowTintVal.b));
+                var shadowTintVal = lightRenderData.shadowTint;
+                bool penumbraTintVal = lightRenderData.penumbraTint && ((shadowTintVal.r != shadowTintVal.g) || (shadowTintVal.g != shadowTintVal.b));
                 lightData.penumbraTint = penumbraTintVal ? 1.0f : 0.0f;
                 if (penumbraTintVal)
                     lightData.shadowTint = new Vector3(Mathf.Pow(shadowTintVal.r, 2.2f), Mathf.Pow(shadowTintVal.g, 2.2f), Mathf.Pow(shadowTintVal.b, 2.2f));
@@ -536,7 +496,8 @@ namespace UnityEngine.Rendering.HighDefinition
                 int dataIndex = processedEntity.dataIndex;
                 var lightData = new DirectionalLightData();
 
-                lightData.lightLayers = GetLightLayer(dataIndex);
+                ref HDLightRenderData lightRenderData = ref GetLightData(dataIndex);
+                lightData.lightLayers = GetLightLayer(lightRenderData);
                 // Light direction for directional is opposite to the forward direction
                 lightData.forward = light.GetForward();
                 lightData.color = GetLightColor(light);
@@ -545,25 +506,25 @@ namespace UnityEngine.Rendering.HighDefinition
                 // So we expect that all light with additionalData == HDUtils.s_DefaultHDAdditionalLightData are currently the one from the preview, light in scene MUST have additionalData
                 lightData.color *= (defaultDataIndex == dataIndex) ? Mathf.PI : 1.0f;
 
-                lightData.lightDimmer = lightDimmer[dataIndex];
-                lightData.diffuseDimmer = affectDiffuse[dataIndex] ? lightData.lightDimmer : 0;
-                lightData.specularDimmer = affectSpecular[dataIndex] ? lightData.lightDimmer * specularGlobalDimmer : 0;
-                lightData.volumetricLightDimmer = volumetricDimmer[dataIndex];
+                lightData.lightDimmer = lightRenderData.lightDimmer;
+                lightData.diffuseDimmer = lightRenderData.affectDiffuse ? lightData.lightDimmer : 0;
+                lightData.specularDimmer = lightRenderData.affectSpecular ? lightData.lightDimmer * specularGlobalDimmer : 0;
+                lightData.volumetricLightDimmer = lightRenderData.volumetricDimmer;
 
                 lightData.shadowIndex = -1;
                 lightData.screenSpaceShadowIndex = invalidScreenSpaceShadowIndex;
                 lightData.isRayTracedContactShadow = 0.0f;
 
                 // Rescale for cookies and windowing.
-                lightData.right = light.GetRight() * 2 / Mathf.Max(shapeWidth[dataIndex], 0.001f);
-                lightData.up = light.GetUp() * 2 / Mathf.Max(shapeHeight[dataIndex], 0.001f);
+                lightData.right = light.GetRight() * 2 / Mathf.Max(lightRenderData.shapeWidth, 0.001f);
+                lightData.up = light.GetUp() * 2 / Mathf.Max(lightRenderData.shapeHeight, 0.001f);
                 lightData.positionRWS = light.GetPosition();
-                lightData.shadowDimmer = shadowDimmer[dataIndex];
-                lightData.volumetricShadowDimmer = volumetricShadowDimmer[dataIndex];
+                lightData.shadowDimmer = lightRenderData.shadowDimmer;
+                lightData.volumetricShadowDimmer = lightRenderData.volumetricShadowDimmer;
 
                 // We want to have a colored penumbra if the flag is on and the color is not gray
-                var shadowTintValue = shadowTint[dataIndex];
-                bool penumbraTintValue = penumbraTint[dataIndex] && ((shadowTintValue.r != shadowTintValue.g) || (shadowTintValue.g != shadowTintValue.b));
+                var shadowTintValue = lightRenderData.shadowTint;
+                bool penumbraTintValue = lightRenderData.penumbraTint && ((shadowTintValue.r != shadowTintValue.g) || (shadowTintValue.g != shadowTintValue.b));
                 lightData.penumbraTint = penumbraTintValue ? 1.0f : 0.0f;
                 if (penumbraTintValue)
                     lightData.shadowTint = new Vector3(shadowTintValue.r * shadowTintValue.r, shadowTintValue.g * shadowTintValue.g, shadowTintValue.b * shadowTintValue.b);
@@ -571,7 +532,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     lightData.shadowTint = new Vector3(shadowTintValue.r, shadowTintValue.g, shadowTintValue.b);
 
                 //Value of max smoothness is derived from AngularDiameter. Formula results from eyeballing. Angular diameter of 0 results in 1 and angular diameter of 80 results in 0.
-                float maxSmoothness = Mathf.Clamp01(1.35f / (1.0f + Mathf.Pow(1.15f * (0.0315f * angularDiameter[dataIndex] + 0.4f), 2f)) - 0.11f);
+                float maxSmoothness = Mathf.Clamp01(1.35f / (1.0f + Mathf.Pow(1.15f * (0.0315f * lightRenderData.angularDiameter + 0.4f), 2f)) - 0.11f);
                 // Value of max smoothness is from artists point of view, need to convert from perceptual smoothness to roughness
                 lightData.minRoughness = (1.0f - maxSmoothness) * (1.0f - maxSmoothness);
 
@@ -590,12 +551,12 @@ namespace UnityEngine.Rendering.HighDefinition
                     lightData.nonLightMappedOnly = 0;
                 }
 
-                bool interactsWithSkyVal = isPbrSkyActive && interactsWithSky[dataIndex];
+                bool interactsWithSkyVal = isPbrSkyActive && lightRenderData.interactsWithSky;
                 lightData.distanceFromCamera = -1; // Encode 'interactsWithSky'
 
                 if (interactsWithSkyVal)
                 {
-                    lightData.distanceFromCamera = distance[dataIndex];
+                    lightData.distanceFromCamera = lightRenderData.distance;
 
                     if (precomputedAtmosphericAttenuation != 0)
                     {
@@ -608,12 +569,12 @@ namespace UnityEngine.Rendering.HighDefinition
                     }
                 }
 
-                lightData.angularDiameter = angularDiameter[dataIndex] * Mathf.Deg2Rad;
+                lightData.angularDiameter = lightRenderData.angularDiameter * Mathf.Deg2Rad;
 
-                lightData.flareSize = Mathf.Max(flareSize[dataIndex] * Mathf.Deg2Rad, 5.960464478e-8f);
-                lightData.flareFalloff = flareFalloff[dataIndex];
-                lightData.flareTint = (Vector3)(Vector4)flareTint[dataIndex];
-                lightData.surfaceTint = (Vector3)(Vector4)surfaceTint[dataIndex];
+                lightData.flareSize = Mathf.Max(lightRenderData.flareSize * Mathf.Deg2Rad, 5.960464478e-8f);
+                lightData.flareFalloff = lightRenderData.flareFalloff;
+                lightData.flareTint = (Vector3)(Vector4)lightRenderData.flareTint;
+                lightData.surfaceTint = (Vector3)(Vector4)lightRenderData.surfaceTint;
 
                 if (useCameraRelativePosition)
                     lightData.positionRWS -= cameraPos;
@@ -629,7 +590,9 @@ namespace UnityEngine.Rendering.HighDefinition
                 HDGpuLightList.UnpackLightSortKey(sortKey, out var lightCategory, out var gpuLightType, out var lightVolumeType, out var lightIndex);
 
                 if (gpuLightType == GPULightType.Directional)
+                {
                     ConvertDirectionalLightToGPUFormat(index, lightIndex, lightCategory, gpuLightType, lightVolumeType);
+                }
                 else
                 {
                     int outputIndex = index - directionalSortedLightCounts;
@@ -673,32 +636,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 aerosolExtinctionCoefficient = skySettings.GetAerosolExtinctionCoefficient(),
 
                 // light entity SoA data
-                lightLayers = lightEntities.lightLayers,
-                lightDimmer = lightEntities.lightDimmer,
-                volumetricDimmer = lightEntities.volumetricDimmer,
-                shadowDimmer = lightEntities.shadowDimmer,
-                affectDiffuse = lightEntities.affectDiffuse,
-                affectSpecular = lightEntities.affectSpecular,
-                applyRangeAttenuation = lightEntities.applyRangeAttenuation,
-                shadowFadeDistance = lightEntities.shadowFadeDistance,
-                distance = lightEntities.distance,
-                angularDiameter = lightEntities.angularDiameter,
-                volumetricShadowDimmer = lightEntities.volumetricShadowDimmer,
-                shapeWidth = lightEntities.shapeWidth,
-                shapeHeight = lightEntities.shapeHeight,
-                aspectRatio = lightEntities.aspectRatio,
-                innerSpotPercent = lightEntities.innerSpotPercent,
-                spotIESCutoffPercent = lightEntities.spotIESCutoffPercent,
-                shapeRadius = lightEntities.shapeRadius,
-                barnDoorLength = lightEntities.barnDoorLength,
-                barnDoorAngle = lightEntities.barnDoorAngle,
-                flareSize = lightEntities.flareSize,
-                flareFalloff = lightEntities.flareFalloff,
-                penumbraTint = lightEntities.penumbraTint,
-                interactsWithSky = lightEntities.interactsWithSky,
-                surfaceTint = lightEntities.surfaceTint,
-                shadowTint = lightEntities.shadowTint,
-                flareTint = lightEntities.flareTint,
+                lightData = lightEntities.lightData,
 
                 //visible lights processed
                 sortKeys = visibleLights.sortKeys,
