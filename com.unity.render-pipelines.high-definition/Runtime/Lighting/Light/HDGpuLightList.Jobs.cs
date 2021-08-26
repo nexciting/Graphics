@@ -2,6 +2,7 @@ using UnityEngine.Jobs;
 using Unity.Jobs;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using System.Threading;
 
 namespace UnityEngine.Rendering.HighDefinition
 {
@@ -120,6 +121,9 @@ namespace UnityEngine.Rendering.HighDefinition
             [WriteOnly]
             [NativeDisableContainerSafetyRestriction]
             public NativeArray<LightVolumeData> lightVolumes;
+            [WriteOnly]
+            [NativeDisableContainerSafetyRestriction]
+            public NativeArray<int> gpuLightCounters;
             #endregion
 
             private uint GetLightLayer(int dataIndex)
@@ -130,6 +134,15 @@ namespace UnityEngine.Rendering.HighDefinition
             }
 
             private Vector3 GetLightColor(in VisibleLight light) => new Vector3(light.finalColor.r, light.finalColor.g, light.finalColor.b);
+
+            private void IncrementCounter(HDGpuLightList.GPULightTypeCountSlots counterSlot)
+            {
+                unsafe
+                {
+                    int* ptr = (int*)gpuLightCounters.GetUnsafePtr<int>() + (int)counterSlot;
+                    Interlocked.Increment(ref UnsafeUtility.AsRef<int>(ptr));
+                }
+            }
 
             private void ConvertLightToGPUFormat(
                 int outputIndex, int lightIndex,
@@ -321,6 +334,19 @@ namespace UnityEngine.Rendering.HighDefinition
                 if (useCameraRelativePosition)
                     lightData.positionRWS -= cameraPos;
  
+                switch (lightCategory)
+                {
+                    case LightCategory.Punctual:
+                        IncrementCounter(HDGpuLightList.GPULightTypeCountSlots.Punctual);
+                        break;
+                    case LightCategory.Area:
+                        IncrementCounter(HDGpuLightList.GPULightTypeCountSlots.Area);
+                        break;
+                    default:
+                        Debug.Assert(false, "TODO: encountered an unknown LightCategory.");
+                        break;
+                }
+
                 lights[outputIndex] = lightData;
             }
 
@@ -592,6 +618,8 @@ namespace UnityEngine.Rendering.HighDefinition
                 if (useCameraRelativePosition)
                     lightData.positionRWS -= cameraPos;
 
+                IncrementCounter(HDGpuLightList.GPULightTypeCountSlots.Directional);
+
                 directionalLights[index] = lightData;
             }
 
@@ -680,6 +708,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 visibleLightShadowCasterMode = visibleLights.visibleLightShadowCasterMode,
 
                 //outputs
+                gpuLightCounters = m_LightTypeCounters,
                 lights = m_Lights,
                 directionalLights = m_DirectionalLights,
                 lightsPerView = m_LightsPerView,

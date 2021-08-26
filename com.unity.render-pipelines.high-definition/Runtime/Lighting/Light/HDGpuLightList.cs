@@ -14,6 +14,13 @@ namespace UnityEngine.Rendering.HighDefinition
             public int boundsCount;
         }
 
+        internal enum GPULightTypeCountSlots
+        {
+            Directional,
+            Punctual,
+            Area
+        }
+
         private NativeArray<LightsPerView> m_LightsPerView;
         private int m_LighsPerViewCapacity = 0;
         private int m_LightsPerViewCount = 0;
@@ -35,13 +42,18 @@ namespace UnityEngine.Rendering.HighDefinition
         public NativeArray<LightData> lights => m_Lights;
         public int lightsCount => m_LightCount;
         public NativeArray<DirectionalLightData> directionalLights => m_DirectionalLights;
-        public int directionalLightCount => m_DirectionalLightCount;
 
         public NativeArray<LightsPerView> lightsPerView => m_LightsPerView;
         public NativeArray<SFiniteLightBound> lightBounds => m_LightBounds;
         public NativeArray<LightVolumeData> lightVolumes => m_LightVolumes;
         public int lightsPerViewCount => m_LightsPerViewCount;
         public int lightBoundsCount => m_LightBoundsCount;
+
+        public int directionalLightCount => m_LightTypeCounters.IsCreated ? m_LightTypeCounters[(int)GPULightTypeCountSlots.Directional] : 0;
+        public int punctualLightCount => m_LightTypeCounters.IsCreated ? m_LightTypeCounters[(int)GPULightTypeCountSlots.Punctual] : 0;
+        public int areaLightCount => m_LightTypeCounters.IsCreated ? m_LightTypeCounters[(int)GPULightTypeCountSlots.Area] : 0;
+
+        private NativeArray<int> m_LightTypeCounters;
 
         HDRenderPipelineAsset m_Asset;
         HDShadowManager m_ShadowManager;
@@ -121,6 +133,9 @@ namespace UnityEngine.Rendering.HighDefinition
                 m_LightVolumes.ResizeArray(m_LightBoundsCapacity);
             }
             m_LightBoundsCount = totalBoundsCount;
+
+            if (!m_LightTypeCounters.IsCreated)
+                m_LightTypeCounters.ResizeArray(Enum.GetValues(typeof(GPULightTypeCountSlots)).Length);
         }
 
         // The first rendered 24 lights that have contact shadow enabled have a mask used to select the bit that contains
@@ -475,6 +490,10 @@ namespace UnityEngine.Rendering.HighDefinition
             int lightsCount = visibleLights.sortedNonDirectionalLightCounts;
             int directionalCount = visibleLights.sortedDirectionalLightCounts;
             Allocate(lightsCount, directionalCount, hdCamera.viewCount);
+
+            for (int i = 0; i < m_LightTypeCounters.Length; ++i)
+                m_LightTypeCounters[i] = 0;
+
             if (m_LightCount > 0)
             {
                 for (int viewId = 0; viewId < hdCamera.viewCount; ++viewId)
@@ -492,6 +511,10 @@ namespace UnityEngine.Rendering.HighDefinition
                 CompleteGpuLightDataJob();
                 CalculateAllLightDataTextureInfo(cmd, hdCamera, cullingResult, visibleLights, lightEntities, hdShadowSettings, shadowInitParams, debugDisplaySettings);
             }
+             
+            //Sanity check
+            Debug.Assert(m_DirectionalLightCount == directionalLightCount, "Mismatch in Directional gpu lights processed. Lights should not be culled in this loop.");
+            Debug.Assert(m_LightCount == areaLightCount + punctualLightCount, "Mismatch in Area and Punctual gpu lights processed. Lights should not be culled in this loop.");
         }
 
         public void Cleanup()
@@ -510,6 +533,9 @@ namespace UnityEngine.Rendering.HighDefinition
 
             if (m_LightVolumes.IsCreated)
                 m_LightVolumes.Dispose();
+    
+            if (m_LightTypeCounters.IsCreated)
+                m_LightTypeCounters.Dispose();
         }
     }
 }
