@@ -9,11 +9,5 @@ namespace UnityEditor.Rendering.HighDefinition
         public override void OnInspectorGUI()
         {
         }
-
-        [MenuItem("CONTEXT/HDAdditionalCameraData/Remove Component")]
-        static void RemoveComponent(MenuCommand command)
-        {
-            EditorUtility.DisplayDialog("Component Info", "You can not delete this component, you will have to remove the camera.", "OK");
-        }
     }
 }
