@@ -231,7 +231,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
         #endregion
 
-        #region private definitions 
+        #region private definitions
 
         // Intermediate struct which holds the data index of an entity and other information.
         private struct LightEntityInfo

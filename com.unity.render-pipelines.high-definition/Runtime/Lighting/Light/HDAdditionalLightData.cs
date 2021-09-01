@@ -3523,7 +3523,7 @@ namespace UnityEngine.Rendering.HighDefinition
             HDLightRenderDatabase lightEntities = HDLightRenderDatabase.instance;
             lightEntity = lightEntities.CreateEntity();
             lightEntities.AttachGameObjectData(lightEntity, legacyLight.GetInstanceID(), transform, this, legacyLight.gameObject);
-            UpdateRenderEntity(); 
+            UpdateRenderEntity();
         }
 
         void OnEnable()

@@ -1553,7 +1553,7 @@ namespace UnityEngine.Rendering.HighDefinition
                         HDGpuLightList.UnpackLightSortKey(sortKey, out var _, out var _, out var _, out var lightIndex);
                         HDVisibleLightEntities.ProcessedVisibleLightEntity processedLightEntity = visibleLightEntities.processedEntities[lightIndex];
                         HDAdditionalLightData additionalLightData = lightEntities.hdAdditionalLightData[processedLightEntity.dataIndex];
-                        if (additionalLightData == null) 
+                        if (additionalLightData == null)
                             continue;
 
                         if (processedLightEntity.gpuLightType == GPULightType.Directional)
