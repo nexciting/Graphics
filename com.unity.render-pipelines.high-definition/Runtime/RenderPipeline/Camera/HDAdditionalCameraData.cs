@@ -158,7 +158,7 @@ namespace UnityEngine.Rendering.HighDefinition
     [AddComponentMenu("")] // Hide in menu
     [DisallowMultipleComponent, ExecuteAlways]
     [RequireComponent(typeof(Camera))]
-    [AdditionalComponentData(typeof(Camera))]
+    [AdditionalComponentData(typeof(Camera), typeof(HDAdditionalCameraData))]
     public partial class HDAdditionalCameraData : MonoBehaviour, IFrameSettingsHistoryContainer
     {
         /// <summary>

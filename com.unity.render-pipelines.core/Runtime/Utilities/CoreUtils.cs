@@ -1,8 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering.RendererUtils;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace UnityEngine.Rendering
 {
@@ -1464,6 +1470,53 @@ namespace UnityEngine.Rendering
                 throw new System.ArgumentException($"Path should start with \"Assets/\". Got {filePath}.", filePath);
 
             Recurse(filePath.Substring(0, filePath.LastIndexOf('/')));
+        }
+
+        static Action<string, string, bool, int, Action, Func<bool>> GetAddMenuItemFunction()
+        {
+            MethodInfo addMenuItemMethodInfo = typeof(Menu).GetMethod("AddMenuItem", BindingFlags.Static | BindingFlags.NonPublic);
+
+            //AddMenuItem(string name, string shortcut, bool @checked, int priority, System.Action execute, System.Func<bool> validate);
+            var nameParam = Expression.Parameter(typeof(string), "name");
+            var shortcutParam = Expression.Parameter(typeof(string), "shortcut");
+            var checkedParam = Expression.Parameter(typeof(bool), "checked");
+            var priorityParam = Expression.Parameter(typeof(int), "priority");
+            var executeParam = Expression.Parameter(typeof(Action), "execute");
+            var validateParam = Expression.Parameter(typeof(Func<bool>), "validate");
+
+            var expressionCall = Expression.Call(null, addMenuItemMethodInfo,
+                        nameParam,
+                        shortcutParam,
+                        checkedParam,
+                        priorityParam,
+                        executeParam,
+                        validateParam);
+
+            return Expression.Lambda<Action<string, string, bool, int, Action, Func<bool>>>(
+                Expression.Block(expressionCall),
+                nameParam,
+                shortcutParam,
+                checkedParam,
+                priorityParam,
+                executeParam,
+                validateParam).Compile();
+        }
+
+        static Action<string, string, bool, int, Action, Func<bool>> s_AddMenuItem = GetAddMenuItemFunction();
+
+        /// <summary>
+        /// Registers a Menu item with an Action when the menu item is pressed
+        /// </summary>
+        /// <param name="path">The path of the menu item</param>
+        /// <param name="action">The action that will be executed when the menu item is pressed by the user</param>
+        internal static void RegisterMenu(string path, Action action)
+        {
+            s_AddMenuItem(path,
+                    string.Empty,
+                    false,
+                    0,
+                    action,
+                    () => { return true; });
         }
 
 #endif

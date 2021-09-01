@@ -1,4 +1,9 @@
 using System;
+using System.Runtime.CompilerServices;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace UnityEngine.Rendering
 {
@@ -35,12 +40,24 @@ namespace UnityEngine.Rendering
         public Type componentType;
 
         /// <summary>
+        /// Summary the additional component type
+        /// </summary>
+        public Type additionalDataComponentType;
+
+        /// <summary>
         /// Constructor of the attribute
         /// </summary>
         /// <param name="componentType">The component type</param>
-        public AdditionalComponentData(Type componentType)
+        public AdditionalComponentData(Type componentType, Type additionalDataComponentType)
         {
             this.componentType = componentType;
+            this.additionalDataComponentType = additionalDataComponentType;
+
+#if UNITY_EDITOR
+            CoreUtils.RegisterMenu($"CONTEXT/{additionalDataComponentType.Name}/Remove Component",
+                () => EditorUtility.DisplayDialog($"Remove {additionalDataComponentType.Name} is blocked", $"You can not delete this component, you will have to remove the {componentType.Name}.", "OK"));
+#endif
         }
+
     }
 }

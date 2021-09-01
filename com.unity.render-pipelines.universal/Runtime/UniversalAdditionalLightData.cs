@@ -53,7 +53,7 @@ namespace UnityEngine.Rendering.Universal
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Light))]
-    [AdditionalComponentData(typeof(Light))]
+    [AdditionalComponentData(typeof(Light), typeof(UniversalAdditionalLightData))]
     [URPHelpURL("universal-additional-light-data")]
     public class UniversalAdditionalLightData : MonoBehaviour
     {

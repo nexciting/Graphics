@@ -6,7 +6,7 @@ namespace UnityEngine.Rendering.HighDefinition
     [HDRPHelpURLAttribute("Reflection-Probe")]
     [AddComponentMenu("")] // Hide in menu
     [RequireComponent(typeof(ReflectionProbe))]
-    [AdditionalComponentData(typeof(ReflectionProbe))]
+    [AdditionalComponentData(typeof(ReflectionProbe), typeof(HDAdditionalReflectionData))]
     public sealed partial class HDAdditionalReflectionData : HDProbe
     {
         void Awake()

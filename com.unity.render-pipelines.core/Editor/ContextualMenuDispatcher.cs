@@ -36,65 +36,8 @@ namespace UnityEditor.Rendering
     /// <summary>
     /// Helper methods for overriding contextual menus
     /// </summary>
-    [InitializeOnLoad]
     static class ContextualMenuDispatcher
     {
-        static Action<string, string, bool, int, Action, Func<bool>> GetAddMenuItemFunction()
-        {
-            MethodInfo addMenuItemMethodInfo = typeof(Menu).GetMethod("AddMenuItem", BindingFlags.Static | BindingFlags.NonPublic);
-
-            //AddMenuItem(string name, string shortcut, bool @checked, int priority, System.Action execute, System.Func<bool> validate);
-            var nameParam = Expression.Parameter(typeof(string), "name");
-            var shortcutParam = Expression.Parameter(typeof(string), "shortcut");
-            var checkedParam = Expression.Parameter(typeof(bool), "checked");
-            var priorityParam = Expression.Parameter(typeof(int), "priority");
-            var executeParam = Expression.Parameter(typeof(Action), "execute");
-            var validateParam = Expression.Parameter(typeof(Func<bool>), "validate");
-
-            var expressionCall = Expression.Call(null, addMenuItemMethodInfo,
-                        nameParam,
-                        shortcutParam,
-                        checkedParam,
-                        priorityParam,
-                        executeParam,
-                        validateParam);
-
-            return Expression.Lambda<Action<string, string, bool, int, Action, Func<bool>>>(
-                Expression.Block(expressionCall),
-                nameParam,
-                shortcutParam,
-                checkedParam,
-                priorityParam,
-                executeParam,
-                validateParam).Compile();
-        }
-
-        static Action<string, string, bool, int, Action, Func<bool>> s_AddMenuItem = GetAddMenuItemFunction();
-
-        static HashSet<string> s_RegisteredMenuItems = new HashSet<string>();
-
-        static void OverrideRemoveComponentMenuItems()
-        {
-            foreach (var additionalDataComponentType in TypeCache.GetTypesWithAttribute(typeof(AdditionalComponentData)))
-            {
-                var componentType = additionalDataComponentType.GetCustomAttribute<AdditionalComponentData>().componentType;
-                var componentTypeName = componentType.Name;
-
-                // Register the additional data menu item
-                s_AddMenuItem($"CONTEXT/{additionalDataComponentType.Name}/Remove Component",
-                    string.Empty,
-                    false,
-                    0,
-                    () => EditorUtility.DisplayDialog($"Remove {additionalDataComponentType.Name} is blocked", $"You can not delete this component, you will have to remove the {componentType}.", "OK"),
-                    () => { return true; });
-            }
-        }
-
-        static ContextualMenuDispatcher()
-        {
-            OverrideRemoveComponentMenuItems();
-        }
-
         [MenuItem("CONTEXT/ReflectionProbe/Remove Component")]
         static void RemoveReflectionProbeComponent(MenuCommand command)
         {
