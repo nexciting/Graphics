@@ -548,8 +548,6 @@ namespace UnityEngine.Rendering.HighDefinition
                 visibleLight.spotAngle = lightComponent.spotAngle;
 
                 int shadowIndex = additionalLightData.shadowIndex;
-                int screenSpaceShadowIndex = -1;
-                int screenSpaceChannelSlot = -1;
                 Vector3 lightDimensions = new Vector3(0.0f, 0.0f, 0.0f);
 
                 // Use the shared code to build the light data

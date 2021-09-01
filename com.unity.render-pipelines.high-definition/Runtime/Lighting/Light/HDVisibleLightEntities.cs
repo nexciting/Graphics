@@ -48,7 +48,7 @@ namespace UnityEngine.Rendering.HighDefinition
         NativeArray<int> m_ProcessVisibleLightCounts;
 
         #region visible lights SoA
-        NativeArray<HDLightRenderEntityData> m_VisibleEntities;
+        NativeArray<int> m_VisibleLightEntityDataIndices;
         NativeArray<LightBakingOutput> m_VisibleLightBakingOutput;
         NativeArray<LightShadowCasterMode> m_VisibleLightShadowCasterMode;
         NativeArray<LightShadows> m_VisibleLightShadows;
@@ -61,14 +61,14 @@ namespace UnityEngine.Rendering.HighDefinition
         NativeArray<uint> m_SortSupportArray;
         NativeArray<int> m_ShadowLightsDataIndices;
 
-        public int sortedLightCounts => m_ProcessVisibleLightCounts.IsCreated ? m_ProcessVisibleLightCounts[(int)ProcessLightsCountSlots.ProcessedLights] : 0;
-        public int sortedDirectionalLightCounts => m_ProcessVisibleLightCounts.IsCreated ? m_ProcessVisibleLightCounts[(int)ProcessLightsCountSlots.DirectionalLights] : 0;
+        public int sortedLightCounts => m_ProcessVisibleLightCounts[(int)ProcessLightsCountSlots.ProcessedLights];
+        public int sortedDirectionalLightCounts => m_ProcessVisibleLightCounts[(int)ProcessLightsCountSlots.DirectionalLights];
         public int sortedNonDirectionalLightCounts => sortedLightCounts - sortedDirectionalLightCounts;
-        public int bakedShadowsCount => m_ProcessVisibleLightCounts.IsCreated ? m_ProcessVisibleLightCounts[(int)ProcessLightsCountSlots.BakedShadows] : 0;
+        public int bakedShadowsCount => m_ProcessVisibleLightCounts[(int)ProcessLightsCountSlots.BakedShadows];
 
         public NativeArray<LightBakingOutput> visibleLightBakingOutput => m_VisibleLightBakingOutput;
         public NativeArray<LightShadowCasterMode> visibleLightShadowCasterMode => m_VisibleLightShadowCasterMode;
-        public NativeArray<HDLightRenderEntityData> visibleEntities => m_VisibleEntities;
+        public NativeArray<int> visibleLightEntityDataIndices => m_VisibleLightEntityDataIndices;
         public NativeArray<LightVolumeType> processedLightVolumeType => m_ProcessedLightVolumeType;
         public NativeArray<ProcessedVisibleLightEntity> processedEntities => m_ProcessedEntities;
         public NativeArray<uint> sortKeys => m_SortKeys;
@@ -78,7 +78,7 @@ namespace UnityEngine.Rendering.HighDefinition
         private void ResizeArrays(int newCapacity)
         {
             m_Capacity = Math.Max(Math.Max(newCapacity, ArrayCapacity), m_Capacity * 2);
-            m_VisibleEntities.ResizeArray(m_Capacity);
+            m_VisibleLightEntityDataIndices.ResizeArray(m_Capacity);
             m_VisibleLightBakingOutput.ResizeArray(m_Capacity);
             m_VisibleLightShadowCasterMode.ResizeArray(m_Capacity);
             m_VisibleLightShadows.ResizeArray(m_Capacity);
@@ -99,7 +99,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
             m_ProcessVisibleLightCounts.Dispose();
 
-            m_VisibleEntities.Dispose();
+            m_VisibleLightEntityDataIndices.Dispose();
             m_VisibleLightBakingOutput.Dispose();
             m_VisibleLightShadowCasterMode.Dispose();
             m_VisibleLightShadows.Dispose();
@@ -199,6 +199,16 @@ namespace UnityEngine.Rendering.HighDefinition
         {
             m_Size = 0;
             HDLightRenderDatabase.instance.CompleteLightTransformDataJobs();
+
+            if (!m_ProcessVisibleLightCounts.IsCreated)
+            {
+                int totalCounts = Enum.GetValues(typeof(ProcessLightsCountSlots)).Length;
+                m_ProcessVisibleLightCounts.ResizeArray(totalCounts);
+            }
+
+            for (int i = 0; i < m_ProcessVisibleLightCounts.Length; ++i)
+                m_ProcessVisibleLightCounts[i] = 0;
+
             using (new ProfilingScope(null, ProfilingSampler.Get(HDProfileId.BuildVisibleLightEntities)))
             {
                 if (cullResults.visibleLights.Length == 0
@@ -216,14 +226,14 @@ namespace UnityEngine.Rendering.HighDefinition
                 for (int i = 0; i < cullResults.visibleLights.Length; ++i)
                 {
                     Light light = cullResults.visibleLights[i].light;
-                    var entityData = HDLightRenderDatabase.instance.FindEntity(light);
-                    if (!entityData.valid)
+                    int dataIndex = HDLightRenderDatabase.instance.FindEntityDataIndex(light);
+                    if (dataIndex == HDLightRenderDatabase.InvalidDataIndex)
                     {
                         var defaultEntity = HDLightRenderDatabase.instance.GetDefaultLightEntity();
-                        entityData = HDLightRenderDatabase.instance.GetEntityData(defaultEntity);
+                        dataIndex = HDLightRenderDatabase.instance.GetEntityDataIndex(defaultEntity);
                     }
 
-                    m_VisibleEntities[i] = entityData;
+                    m_VisibleLightEntityDataIndices[i] = dataIndex;
                     m_VisibleLightBakingOutput[i] = light.bakingOutput;
                     m_VisibleLightShadowCasterMode[i] = light.lightShadowCasterMode;
                     m_VisibleLightShadows[i] = light.shadows;
@@ -277,13 +287,16 @@ namespace UnityEngine.Rendering.HighDefinition
 
             for (int i = 0; i < m_Size; ++i)
             {
-                var visibleEntity = m_VisibleEntities[i];
-                var go = HDLightRenderDatabase.instance.aovGameObjects[visibleEntity.dataIndex];
+                var dataIndex = m_VisibleLightEntityDataIndices[i];
+                if (dataIndex == HDLightRenderDatabase.InvalidDataIndex)
+                    continue;
+
+                var go = HDLightRenderDatabase.instance.aovGameObjects[dataIndex];
                 if (go == null)
                     continue;
 
                 if (!aovRequest.IsLightEnabled(go))
-                    m_VisibleEntities[i] = HDLightRenderEntityData.Invalid;
+                    m_VisibleLightEntityDataIndices[i] = HDLightRenderDatabase.InvalidDataIndex;
             }
         }
 

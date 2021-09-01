@@ -3521,12 +3521,9 @@ namespace UnityEngine.Rendering.HighDefinition
         {
             Assert.IsFalse(lightEntity.valid);
             HDLightRenderDatabase lightEntities = HDLightRenderDatabase.instance;
-            lightEntity = lightEntities.CreateEntity(legacyLight.GetInstanceID(), transform);
-
-            lightEntities.UpdateHDAdditionalLightData(lightEntity, this);//TODO: only added for shadow calculations. To be removed at some point.
-            lightEntities.UpdateAOVGameObject(lightEntity, legacyLight.gameObject);
-
-            UpdateRenderEntity();
+            lightEntity = lightEntities.CreateEntity();
+            lightEntities.AttachGameObjectData(lightEntity, legacyLight.GetInstanceID(), transform, this, legacyLight.gameObject);
+            UpdateRenderEntity(); 
         }
 
         void OnEnable()

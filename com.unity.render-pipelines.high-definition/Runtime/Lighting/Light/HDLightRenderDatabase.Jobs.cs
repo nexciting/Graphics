@@ -23,13 +23,16 @@ namespace UnityEngine.Rendering.HighDefinition
 
             public void Execute(int index, TransformAccess transform)
             {
+                if (!transform.isValid)
+                    return;
+
                 lightPositions[index] = (float3)transform.position;
             }
         }
 
         public void StartLightTransformDataJobs()
         {
-            if (!m_LightPositions.IsCreated || !lightTransforms.isCreated)
+            if (m_AttachedGameObjects == 0 || !m_LightPositions.IsCreated || !lightTransforms.isCreated)
                 return;
 
             var lightTransformJob = new LightCopyTransformDataJob()

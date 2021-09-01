@@ -154,6 +154,29 @@ namespace UnityEngine.Rendering.HighDefinition
 
             if (!m_LightTypeCounters.IsCreated)
                 m_LightTypeCounters.ResizeArray(Enum.GetValues(typeof(GPULightTypeCountSlots)).Length);
+
+            m_ContactShadowIndex = 0;
+            m_ScreenSpaceShadowIndex = 0;
+            m_ScreenSpaceShadowChannelSlot = 0;
+            m_ScreenSpaceShadowsUnion.Clear();
+
+            m_CurrentShadowSortedSunLightIndex = -1;
+            m_CurrentSunLightAdditionalLightData = null;
+            m_CurrentSunShadowMapFlags = HDVisibleLightEntities.ShadowMapFlags.None;
+
+            m_DebugSelectedLightShadowIndex = -1;
+            m_DebugSelectedLightShadowCount = 0;
+
+            for (int i = 0; i < m_Asset.currentPlatformRenderPipelineSettings.hdShadowInitParams.maxScreenSpaceShadowSlots; ++i)
+            {
+                m_CurrentScreenSpaceShadowData[i].additionalLightData = null;
+                m_CurrentScreenSpaceShadowData[i].lightDataIndex = -1;
+                m_CurrentScreenSpaceShadowData[i].valid = false;
+            }
+
+            for (int i = 0; i < m_LightTypeCounters.Length; ++i)
+                m_LightTypeCounters[i] = 0;
+
         }
 
         public void AddLightBounds(int viewId, in SFiniteLightBound lightBound, in LightVolumeData volumeData)
@@ -471,8 +494,13 @@ namespace UnityEngine.Rendering.HighDefinition
                 LightVolumeType lightVolumeType = (LightVolumeType)((sortKey >> 17) & 0x1F);
                 int lightIndex = (int)(sortKey & 0xFFFF);
 
-                HDLightRenderEntityData entityData = visibleLights.visibleEntities[lightIndex];
-                HDAdditionalLightData additionalLightData = lightEntities.hdAdditionalLightData[entityData.dataIndex];
+                int dataIndex = visibleLights.visibleLightEntityDataIndices[lightIndex];
+                if (dataIndex == HDLightRenderDatabase.InvalidDataIndex)
+                    continue;
+
+                HDAdditionalLightData additionalLightData = lightEntities.hdAdditionalLightData[dataIndex];
+                if (additionalLightData == null)
+                    continue;
 
                 //We utilize a ray light data pointer to avoid copying the entire structure
                 HDVisibleLightEntities.ProcessedVisibleLightEntity* processedEntityPtr = processedLightArrayPtr + lightIndex;
@@ -543,32 +571,10 @@ namespace UnityEngine.Rendering.HighDefinition
             // cookies and now we can layout the atlas (re-insert all entries by order of size) if needed
             m_TextureCaches.lightCookieManager.LayoutIfNeeded();
 
-            m_ContactShadowIndex = 0;
-            m_ScreenSpaceShadowIndex = 0;
-            m_ScreenSpaceShadowChannelSlot = 0;
-            m_ScreenSpaceShadowsUnion.Clear();
-
-            m_CurrentShadowSortedSunLightIndex = -1;
-            m_CurrentSunLightAdditionalLightData = null;
-            m_CurrentSunShadowMapFlags = HDVisibleLightEntities.ShadowMapFlags.None;
-
-            m_DebugSelectedLightShadowIndex = -1;
-            m_DebugSelectedLightShadowCount = 0;
-
-            for (int i = 0; i < m_Asset.currentPlatformRenderPipelineSettings.hdShadowInitParams.maxScreenSpaceShadowSlots; ++i)
-            {
-                m_CurrentScreenSpaceShadowData[i].additionalLightData = null;
-                m_CurrentScreenSpaceShadowData[i].lightDataIndex = -1;
-                m_CurrentScreenSpaceShadowData[i].valid = false;
-            }
-
             int totalLightsCount = visibleLights.sortedLightCounts;
             int lightsCount = visibleLights.sortedNonDirectionalLightCounts;
             int directionalCount = visibleLights.sortedDirectionalLightCounts;
             AllocateLightData(lightsCount, directionalCount);
-
-            for (int i = 0; i < m_LightTypeCounters.Length; ++i)
-                m_LightTypeCounters[i] = 0;
 
             // TODO: Refactor shadow management
             // The good way of managing shadow:

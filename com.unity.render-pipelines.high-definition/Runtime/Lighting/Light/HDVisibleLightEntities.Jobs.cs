@@ -28,7 +28,7 @@ namespace UnityEngine.Rendering.HighDefinition
             [ReadOnly]
             public NativeArray<VisibleLight> visibleLights;
             [ReadOnly]
-            public NativeArray<HDLightRenderEntityData> visibleEntities;
+            public NativeArray<int> visibleLightEntityDataIndices;
             [ReadOnly]
             public NativeArray<LightBakingOutput> visibleLightBakingOutput;
             [ReadOnly]
@@ -79,9 +79,9 @@ namespace UnityEngine.Rendering.HighDefinition
             public NativeArray<int> shadowLightsDataIndices;
             #endregion
 
-            private bool TrivialRejectLight(in VisibleLight light, in HDLightRenderEntityData lightEntity)
+            private bool TrivialRejectLight(in VisibleLight light, int dataIndex)
             {
-                if (!lightEntity.valid)
+                if (dataIndex < 0)
                     return true;
 
                 // We can skip the processing of lights that are so small to not affect at least a pixel on screen.
@@ -228,13 +228,12 @@ namespace UnityEngine.Rendering.HighDefinition
             public void Execute(int index)
             {
                 VisibleLight visibleLight = visibleLights[index];
-                HDLightRenderEntityData visibleLightEntity = visibleEntities[index];
+                int dataIndex = visibleLightEntityDataIndices[index];
                 LightBakingOutput bakingOutput = visibleLightBakingOutput[index];
                 LightShadows shadows = visibleLightShadows[index];
-                if (TrivialRejectLight(visibleLight, visibleLightEntity))
+                if (TrivialRejectLight(visibleLight, dataIndex))
                     return;
 
-                int dataIndex = visibleLightEntity.dataIndex;
                 ref HDLightRenderData lightRenderData = ref GetLightData(dataIndex);
 
                 if (enableRayTracing && !lightRenderData.includeForRayTracing)
@@ -284,7 +283,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 processedLightVolumeType[index] = lightVolumeType;
                 processedEntities[index] = new ProcessedVisibleLightEntity()
                 {
-                    dataIndex = visibleLightEntity.dataIndex,
+                    dataIndex = dataIndex,
                     gpuLightType = gpuLightType,
                     lightType = lightType,
                     lightDistanceFade = lightDistanceFade,
@@ -314,15 +313,6 @@ namespace UnityEngine.Rendering.HighDefinition
             if (m_Size == 0)
                 return;
 
-            if (!m_ProcessVisibleLightCounts.IsCreated)
-            {
-                int totalCounts = Enum.GetValues(typeof(ProcessLightsCountSlots)).Length;
-                m_ProcessVisibleLightCounts.ResizeArray(totalCounts);
-            }
-
-            for (int i = 0; i < m_ProcessVisibleLightCounts.Length; ++i)
-                m_ProcessVisibleLightCounts[i] = 0;
-
             var lightEntityCollection = HDLightRenderDatabase.instance;
             var processVisibleLightJob = new ProcessVisibleLightJob()
             {
@@ -347,7 +337,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 //SoA of all visible light entities.
                 visibleLights = visibleLights,
-                visibleEntities = m_VisibleEntities,
+                visibleLightEntityDataIndices = m_VisibleLightEntityDataIndices,
                 visibleLightBakingOutput = m_VisibleLightBakingOutput,
                 visibleLightShadows = m_VisibleLightShadows,
 
