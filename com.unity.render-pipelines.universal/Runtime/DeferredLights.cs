@@ -379,7 +379,7 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         internal RenderTargetIdentifier[] GbufferAttachmentIdentifiers { get; set; }
         internal GraphicsFormat[] GbufferFormats { get; set; }
-        internal RenderTargetIdentifier DepthAttachmentIdentifier { get; set; }
+        internal RTHandle DepthAttachmentHandle { get; set; }
 
         // Cached.
         int m_CachedRenderWidth = 0;
@@ -820,15 +820,12 @@ namespace UnityEngine.Rendering.Universal.Internal
                     this.GbufferAttachmentIdentifiers[2], this.GbufferAttachmentIdentifiers[4]
                 };
             }
-            this.DepthAttachmentIdentifier = this.DepthAttachment.nameID;
+            this.DepthAttachmentHandle = this.DepthAttachment;
 #if ENABLE_VR && ENABLE_XR_MODULE
             // In XR SinglePassInstance mode, the RTs are texture-array and all slices must be bound.
             if (renderingData.cameraData.xr.enabled)
-            {
                 for (int i = 0; i < this.GbufferAttachmentIdentifiers.Length; ++i)
                     this.GbufferAttachmentIdentifiers[i] = new RenderTargetIdentifier(this.GbufferAttachmentIdentifiers[i], 0, CubemapFace.Unknown, -1);
-                this.DepthAttachmentIdentifier = new RenderTargetIdentifier(this.DepthAttachmentIdentifier, 0, CubemapFace.Unknown, -1);
-            }
 #endif
 
             m_HasTileVisLights = this.TiledDeferredShading && CheckHasTileLights(ref renderingData.lightData.visibleLights);
@@ -965,7 +962,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             CommandBuffer cmd = CommandBufferPool.Get();
             using (new ProfilingScope(cmd, m_ProfilingTileDepthInfo))
             {
-                RenderTargetIdentifier depthSurface = this.DepthAttachmentIdentifier;
+                RenderTargetIdentifier depthSurface = this.DepthAttachmentHandle;
                 RenderTargetIdentifier depthInfoSurface = (tileMipLevel == intermediateMipLevel) ? this.TileDepthInfoTexture.nameID : this.DepthInfoTexture.nameID;
 
                 cmd.SetGlobalTexture(ShaderConstants._DepthTex, depthSurface);
