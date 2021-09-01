@@ -369,7 +369,7 @@ namespace UnityEngine.Rendering.HighDefinition
             bool screenSpaceShadowsSupported = hdCamera.frameSettings.IsEnabled(FrameSettingsField.ScreenSpaceShadows);
 
             // fetch all the lights in the scene
-            HDLightEntityCollection lightEntities = HDLightEntityCollection.instance;
+            HDLightRenderDatabase lightEntities = HDLightRenderDatabase.instance;
             for (int lightIdx = 0; lightIdx < lightEntities.lightCount; ++lightIdx)
             {
                 HDAdditionalLightData hdLight = lightEntities.hdAdditionalLightData[lightIdx];

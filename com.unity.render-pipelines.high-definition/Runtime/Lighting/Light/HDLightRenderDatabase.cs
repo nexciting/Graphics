@@ -9,18 +9,18 @@ using Unity.Collections.LowLevel.Unsafe;
 namespace UnityEngine.Rendering.HighDefinition
 {
     //Internal entity. An index to an array with the Light instance ID
-    internal struct HDLightEntity
+    internal struct HDLightRenderEntity
     {
         public int entityIndex;
-        public static readonly HDLightEntity Invalid = new HDLightEntity() { entityIndex = -1 };
+        public static readonly HDLightRenderEntity Invalid = new HDLightRenderEntity() { entityIndex = -1 };
         public bool valid { get { return entityIndex != -1; } }
     }
 
-    internal struct HDLightEntityData
+    internal struct HDLightRenderEntityData
     {
         public int dataIndex;
         public int lightInstanceID;
-        public static readonly HDLightEntityData Invalid = new HDLightEntityData() { dataIndex = -1, lightInstanceID = -1 };
+        public static readonly HDLightRenderEntityData Invalid = new HDLightRenderEntityData() { dataIndex = -1, lightInstanceID = -1 };
         public bool valid { get { return dataIndex != -1 && lightInstanceID != -1; } }
     }
 
@@ -65,16 +65,16 @@ namespace UnityEngine.Rendering.HighDefinition
 
     //Internal class with SoA for a pool of lights
     //Class representing a pool of lights in the world
-    internal partial class HDLightEntityCollection
+    internal partial class HDLightRenderDatabase
     {
-        private static HDLightEntityCollection s_Instance = null;
+        private static HDLightRenderDatabase s_Instance = null;
 
-        static public HDLightEntityCollection instance
+        static public HDLightRenderDatabase instance
         {
             get
             {
                 if (s_Instance == null)
-                    s_Instance = new HDLightEntityCollection();
+                    s_Instance = new HDLightRenderDatabase();
                 return s_Instance;
             }
         }
@@ -82,9 +82,9 @@ namespace UnityEngine.Rendering.HighDefinition
         public const int ArrayCapacity = 100;
         private int m_Capacity = 0;
         private int m_LightCount = 0;
-        private HDLightEntity m_DefaultLightEntity = HDLightEntity.Invalid;
+        private HDLightRenderEntity m_DefaultLightEntity = HDLightRenderEntity.Invalid;
 
-        List<HDLightEntityData> m_LightEntities = new List<HDLightEntityData>();
+        List<HDLightRenderEntityData> m_LightEntities = new List<HDLightRenderEntityData>();
         Queue<int> m_FreeIndices = new Queue<int>();
 
         #region Structure of arrays for lights
@@ -94,7 +94,7 @@ namespace UnityEngine.Rendering.HighDefinition
         private HDAdditionalLightData[] m_HDAdditionalLightData = null;
         private TransformAccessArray m_LightTransforms;
         private NativeArray<HDLightRenderData> m_LightData;
-        private NativeArray<HDLightEntity> m_OwnerEntity;
+        private NativeArray<HDLightRenderEntity> m_OwnerEntity;
         private NativeArray<float3> m_LightPositions;
 
         private void ResizeArrays()
@@ -158,13 +158,13 @@ namespace UnityEngine.Rendering.HighDefinition
         public int lightCount => m_LightCount;
 
         public NativeArray<HDLightRenderData> lightData => m_LightData;
-        public NativeArray<HDLightEntity> lightEntities => m_OwnerEntity;
+        public NativeArray<HDLightRenderEntity> lightEntities => m_OwnerEntity;
         public HDAdditionalLightData[] hdAdditionalLightData => m_HDAdditionalLightData;
         public GameObject[] aovGameObjects => m_AOVGameObjects;
         public TransformAccessArray lightTransforms => m_LightTransforms;
         public NativeArray<float3> lightPositions => m_LightPositions;
 
-        public ref HDLightRenderData GetLightData(in HDLightEntity entity)
+        public ref HDLightRenderData GetLightData(in HDLightRenderEntity entity)
         {
             int dataIndex = m_LightEntities[entity.entityIndex].dataIndex;
             return ref GetLightData(dataIndex);
@@ -182,59 +182,59 @@ namespace UnityEngine.Rendering.HighDefinition
             }
         }
 
-        public void UpdateHDAdditionalLightData(in HDLightEntity entity, HDAdditionalLightData val) { m_HDAdditionalLightData[m_LightEntities[entity.entityIndex].dataIndex] = val; }
-        public void UpdateAOVGameObject(in HDLightEntity entity, GameObject val) { m_AOVGameObjects[m_LightEntities[entity.entityIndex].dataIndex] = val; }
+        public void UpdateHDAdditionalLightData(in HDLightRenderEntity entity, HDAdditionalLightData val) { m_HDAdditionalLightData[m_LightEntities[entity.entityIndex].dataIndex] = val; }
+        public void UpdateAOVGameObject(in HDLightRenderEntity entity, GameObject val) { m_AOVGameObjects[m_LightEntities[entity.entityIndex].dataIndex] = val; }
 
         #endregion
 
 
-        private Dictionary<int, HDLightEntityData> m_LightsToEntityItem = new Dictionary<int, HDLightEntityData>();
+        private Dictionary<int, HDLightRenderEntityData> m_LightsToEntityItem = new Dictionary<int, HDLightRenderEntityData>();
 
         public void Cleanup()
         {
-            m_DefaultLightEntity = HDLightEntity.Invalid;
-            HDUtils.s_DefaultHDAdditionalLightData.DestroyHDLightEntity();
+            m_DefaultLightEntity = HDLightRenderEntity.Invalid;
+            HDUtils.s_DefaultHDAdditionalLightData.DestroyHDLightRenderEntity();
             HDVisibleLightEntities.Cleanup();
         }
 
-        public HDLightEntity GetDefaultLightEntity()
+        public HDLightRenderEntity GetDefaultLightEntity()
         {
             if (!IsValid(m_DefaultLightEntity))
             {
-                HDUtils.s_DefaultHDAdditionalLightData.CreateHDLightEntity();
+                HDUtils.s_DefaultHDAdditionalLightData.CreateHDLightRenderEntity();
                 m_DefaultLightEntity = HDUtils.s_DefaultHDAdditionalLightData.lightEntity;
             }
 
             return m_DefaultLightEntity;
         }
 
-        public bool IsValid(HDLightEntity entity)
+        public bool IsValid(HDLightRenderEntity entity)
         {
             return entity.valid && entity.entityIndex < m_LightEntities.Count;
         }
 
-        public HDLightEntityData GetEntityData(HDLightEntity entity)
+        public HDLightRenderEntityData GetEntityData(HDLightRenderEntity entity)
         {
             Assert.IsTrue(IsValid(entity));
             return m_LightEntities[entity.entityIndex];
         }
 
-        public int GetEntityDataIndex(HDLightEntity entity) => GetEntityData(entity).dataIndex;
+        public int GetEntityDataIndex(HDLightRenderEntity entity) => GetEntityData(entity).dataIndex;
 
-        public HDLightEntityData FindEntity(in VisibleLight visibleLight) => FindEntity(visibleLight.light);
-        public HDLightEntityData FindEntity(in Light light)
+        public HDLightRenderEntityData FindEntity(in VisibleLight visibleLight) => FindEntity(visibleLight.light);
+        public HDLightRenderEntityData FindEntity(in Light light)
         {
             if (light != null && m_LightsToEntityItem.TryGetValue(light.GetInstanceID(), out var foundEntity))
                 return foundEntity;
 
-            return HDLightEntityData.Invalid;
+            return HDLightRenderEntityData.Invalid;
         }
 
-        public HDLightEntity CreateEntity(int instanceID, Transform transformObject)
+        public HDLightRenderEntity CreateEntity(int instanceID, Transform transformObject)
         {
-            HDLightEntityData newData = AllocateEntityData(instanceID, transformObject);
+            HDLightRenderEntityData newData = AllocateEntityData(instanceID, transformObject);
 
-            HDLightEntity newLightEntity = HDLightEntity.Invalid;
+            HDLightRenderEntity newLightEntity = HDLightRenderEntity.Invalid;
             if (m_FreeIndices.Count == 0)
             {
                 newLightEntity.entityIndex = m_LightEntities.Count;
@@ -252,12 +252,12 @@ namespace UnityEngine.Rendering.HighDefinition
             return newLightEntity;
         }
 
-        public void DestroyEntity(HDLightEntity lightEntity)
+        public void DestroyEntity(HDLightRenderEntity lightEntity)
         {
             Assert.IsTrue(IsValid(lightEntity));
 
             m_FreeIndices.Enqueue(lightEntity.entityIndex);
-            HDLightEntityData entityData = m_LightEntities[lightEntity.entityIndex];
+            HDLightRenderEntityData entityData = m_LightEntities[lightEntity.entityIndex];
             m_LightsToEntityItem.Remove(entityData.lightInstanceID);
 
             RemoveAtSwapBackArrays(entityData.dataIndex);
@@ -268,8 +268,8 @@ namespace UnityEngine.Rendering.HighDefinition
             }
             else
             {
-                HDLightEntity entityToUpdate = m_OwnerEntity[entityData.dataIndex];
-                HDLightEntityData dataToUpdate = m_LightEntities[entityToUpdate.entityIndex];
+                HDLightRenderEntity entityToUpdate = m_OwnerEntity[entityData.dataIndex];
+                HDLightRenderEntityData dataToUpdate = m_LightEntities[entityToUpdate.entityIndex];
                 dataToUpdate.dataIndex = entityData.dataIndex;
                 m_LightEntities[entityToUpdate.entityIndex] = dataToUpdate;
                 if (dataToUpdate.lightInstanceID != entityData.lightInstanceID)
@@ -277,7 +277,7 @@ namespace UnityEngine.Rendering.HighDefinition
             }
         }
 
-        private HDLightEntityData AllocateEntityData(int instanceID, Transform transformObject)
+        private HDLightRenderEntityData AllocateEntityData(int instanceID, Transform transformObject)
         {
             if (m_Capacity == 0 || m_LightCount == m_Capacity)
             {
@@ -286,12 +286,12 @@ namespace UnityEngine.Rendering.HighDefinition
             }
 
             int newIndex = m_LightCount++;
-            HDLightEntityData newDataIndex = new HDLightEntityData { dataIndex = newIndex, lightInstanceID = instanceID };
+            HDLightRenderEntityData newDataIndex = new HDLightRenderEntityData { dataIndex = newIndex, lightInstanceID = instanceID };
             m_LightTransforms.Add(transformObject);
             return newDataIndex;
         }
 
-        ~HDLightEntityCollection()
+        ~HDLightRenderDatabase()
         {
             DeleteArrays();
         }

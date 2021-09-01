@@ -1546,7 +1546,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 using (new ProfilingScope(cmd, ProfilingSampler.Get(HDProfileId.ProcessDirectionalAndCookies)))
                 {
                     int visibleLightCounts = visibleLightEntities.sortedLightCounts;
-                    var lightEntities = HDLightEntityCollection.instance;
+                    var lightEntities = HDLightRenderDatabase.instance;
                     for (int i = 0; i < visibleLightCounts; ++i)
                     {
                         uint sortKey = visibleLightEntities.sortKeys[i];
@@ -1586,7 +1586,7 @@ namespace UnityEngine.Rendering.HighDefinition
             {
                 // 2. Go through all lights, convert them to GPU format.
                 // Simultaneously create data for culling (LightVolumeData and SFiniteLightBound)
-                m_GpuLightList.BuildLightGPUData(cmd, hdCamera, cullResults, visibleLightEntities, HDLightEntityCollection.instance, m_ShadowInitParameters, m_CurrentDebugDisplaySettings);
+                m_GpuLightList.BuildLightGPUData(cmd, hdCamera, cullResults, visibleLightEntities, HDLightRenderDatabase.instance, m_ShadowInitParameters, m_CurrentDebugDisplaySettings);
 
                 m_EnableBakeShadowMask = m_EnableBakeShadowMask || visibleLightEntities.bakedShadowsCount > 0;
                 m_CurrentShadowSortedSunLightIndex = m_GpuLightList.currentShadowSortedSunLightIndex;

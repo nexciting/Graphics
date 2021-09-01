@@ -28,7 +28,7 @@ namespace UnityEngine.Rendering.HighDefinition
             [ReadOnly]
             public NativeArray<VisibleLight> visibleLights;
             [ReadOnly]
-            public NativeArray<HDLightEntityData> visibleEntities;
+            public NativeArray<HDLightRenderEntityData> visibleEntities;
             [ReadOnly]
             public NativeArray<LightBakingOutput> visibleLightBakingOutput;
             [ReadOnly]
@@ -79,7 +79,7 @@ namespace UnityEngine.Rendering.HighDefinition
             public NativeArray<int> shadowLightsDataIndices;
             #endregion
 
-            private bool TrivialRejectLight(in VisibleLight light, in HDLightEntityData lightEntity)
+            private bool TrivialRejectLight(in VisibleLight light, in HDLightRenderEntityData lightEntity)
             {
                 if (!lightEntity.valid)
                     return true;
@@ -228,7 +228,7 @@ namespace UnityEngine.Rendering.HighDefinition
             public void Execute(int index)
             {
                 VisibleLight visibleLight = visibleLights[index];
-                HDLightEntityData visibleLightEntity = visibleEntities[index];
+                HDLightRenderEntityData visibleLightEntity = visibleEntities[index];
                 LightBakingOutput bakingOutput = visibleLightBakingOutput[index];
                 LightShadows shadows = visibleLightShadows[index];
                 if (TrivialRejectLight(visibleLight, visibleLightEntity))
@@ -323,7 +323,7 @@ namespace UnityEngine.Rendering.HighDefinition
             for (int i = 0; i < m_ProcessVisibleLightCounts.Length; ++i)
                 m_ProcessVisibleLightCounts[i] = 0;
 
-            var lightEntityCollection = HDLightEntityCollection.instance;
+            var lightEntityCollection = HDLightRenderDatabase.instance;
             var processVisibleLightJob = new ProcessVisibleLightJob()
             {
                 //Parameters.

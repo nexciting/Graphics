@@ -669,7 +669,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
             base.Dispose(disposing);
 
-            HDLightEntityCollection.instance.Cleanup();
+            HDLightRenderDatabase.instance.Cleanup();
             ReleaseScreenSpaceShadows();
 
             if (m_RayTracingSupported)
@@ -1096,7 +1096,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
             DecalSystem.instance.StartDecalUpdateJobs();
 
-            HDLightEntityCollection.instance.StartLightTransformDataJobs();
+            HDLightRenderDatabase.instance.StartLightTransformDataJobs();
 
             // This function should be called once every render (once for all camera)
             LightLoopNewRender();

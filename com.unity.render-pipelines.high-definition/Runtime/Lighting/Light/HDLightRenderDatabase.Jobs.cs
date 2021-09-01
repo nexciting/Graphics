@@ -8,7 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace UnityEngine.Rendering.HighDefinition
 {
-    internal partial class HDLightEntityCollection
+    internal partial class HDLightRenderDatabase
     {
         #region Transform jobs
         JobHandle m_LightTransformDataJob;

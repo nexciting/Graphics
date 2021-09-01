@@ -48,7 +48,7 @@ namespace UnityEngine.Rendering.HighDefinition
         NativeArray<int> m_ProcessVisibleLightCounts;
 
         #region visible lights SoA
-        NativeArray<HDLightEntityData> m_VisibleEntities;
+        NativeArray<HDLightRenderEntityData> m_VisibleEntities;
         NativeArray<LightBakingOutput> m_VisibleLightBakingOutput;
         NativeArray<LightShadowCasterMode> m_VisibleLightShadowCasterMode;
         NativeArray<LightShadows> m_VisibleLightShadows;
@@ -68,7 +68,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
         public NativeArray<LightBakingOutput> visibleLightBakingOutput => m_VisibleLightBakingOutput;
         public NativeArray<LightShadowCasterMode> visibleLightShadowCasterMode => m_VisibleLightShadowCasterMode;
-        public NativeArray<HDLightEntityData> visibleEntities => m_VisibleEntities;
+        public NativeArray<HDLightRenderEntityData> visibleEntities => m_VisibleEntities;
         public NativeArray<LightVolumeType> processedLightVolumeType => m_ProcessedLightVolumeType;
         public NativeArray<ProcessedVisibleLightEntity> processedEntities => m_ProcessedEntities;
         public NativeArray<uint> sortKeys => m_SortKeys;
@@ -198,11 +198,11 @@ namespace UnityEngine.Rendering.HighDefinition
         private void BuildVisibleLightEntities(in CullingResults cullResults)
         {
             m_Size = 0;
-            HDLightEntityCollection.instance.CompleteLightTransformDataJobs();
+            HDLightRenderDatabase.instance.CompleteLightTransformDataJobs();
             using (new ProfilingScope(null, ProfilingSampler.Get(HDProfileId.BuildVisibleLightEntities)))
             {
                 if (cullResults.visibleLights.Length == 0
-                    || HDLightEntityCollection.instance == null)
+                    || HDLightRenderDatabase.instance == null)
                     return;
 
                 if (cullResults.visibleLights.Length > m_Capacity)
@@ -216,11 +216,11 @@ namespace UnityEngine.Rendering.HighDefinition
                 for (int i = 0; i < cullResults.visibleLights.Length; ++i)
                 {
                     Light light = cullResults.visibleLights[i].light;
-                    var entityData = HDLightEntityCollection.instance.FindEntity(light);
+                    var entityData = HDLightRenderDatabase.instance.FindEntity(light);
                     if (!entityData.valid)
                     {
-                        var defaultEntity = HDLightEntityCollection.instance.GetDefaultLightEntity();
-                        entityData = HDLightEntityCollection.instance.GetEntityData(defaultEntity);
+                        var defaultEntity = HDLightRenderDatabase.instance.GetDefaultLightEntity();
+                        entityData = HDLightRenderDatabase.instance.GetEntityData(defaultEntity);
                     }
 
                     m_VisibleEntities[i] = entityData;
@@ -259,7 +259,7 @@ namespace UnityEngine.Rendering.HighDefinition
                             continue;
                         }
 
-                        HDAdditionalLightData additionalLightData = HDLightEntityCollection.instance.hdAdditionalLightData[entity->dataIndex];
+                        HDAdditionalLightData additionalLightData = HDLightRenderDatabase.instance.hdAdditionalLightData[entity->dataIndex];
                         if (additionalLightData == null)
                             continue;
 
@@ -278,12 +278,12 @@ namespace UnityEngine.Rendering.HighDefinition
             for (int i = 0; i < m_Size; ++i)
             {
                 var visibleEntity = m_VisibleEntities[i];
-                var go = HDLightEntityCollection.instance.aovGameObjects[visibleEntity.dataIndex];
+                var go = HDLightRenderDatabase.instance.aovGameObjects[visibleEntity.dataIndex];
                 if (go == null)
                     continue;
 
                 if (!aovRequest.IsLightEnabled(go))
-                    m_VisibleEntities[i] = HDLightEntityData.Invalid;
+                    m_VisibleEntities[i] = HDLightRenderEntityData.Invalid;
             }
         }
 

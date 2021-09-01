@@ -256,7 +256,7 @@ namespace UnityEngine.Rendering.HighDefinition
             totalLightCount = 0;
 
             int realIndex = 0;
-            HDLightEntityCollection lightEntities = HDLightEntityCollection.instance;
+            HDLightRenderDatabase lightEntities = HDLightRenderDatabase.instance;
             for (int lightIdx = 0; lightIdx < lightEntities.lightCount; ++lightIdx)
             {
                 HDAdditionalLightData currentLight = lightEntities.hdAdditionalLightData[lightIdx];
@@ -490,7 +490,7 @@ namespace UnityEngine.Rendering.HighDefinition
             BoolScalableSetting contactShadowScalableSetting = HDAdditionalLightData.ScalableSettings.UseContactShadow(m_RenderPipeline.asset);
 
             // Build the data for every light
-            HDLightEntityCollection lightEntities = HDLightEntityCollection.instance;
+            HDLightRenderDatabase lightEntities = HDLightRenderDatabase.instance;
             var processedLightEntity = new HDVisibleLightEntities.ProcessedVisibleLightEntity()
             {
                 shadowMapFlags = HDVisibleLightEntities.ShadowMapFlags.None
@@ -785,7 +785,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
         public void ReserveCookieAtlasSlots(HDRayTracingLights rayTracingLights)
         {
-            HDLightEntityCollection lightEntities = HDLightEntityCollection.instance;
+            HDLightRenderDatabase lightEntities = HDLightRenderDatabase.instance;
             for (int lightIdx = 0; lightIdx < lightEntities.lightCount; ++lightIdx)
             {
                 // Grab the additional light data to process

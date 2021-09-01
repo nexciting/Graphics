@@ -448,7 +448,7 @@ namespace UnityEngine.Rendering.HighDefinition
             HDCamera hdCamera,
             in CullingResults cullResults,
             HDVisibleLightEntities visibleLights,
-            HDLightEntityCollection lightEntities,
+            HDLightRenderDatabase lightEntities,
             HDShadowSettings hdShadowSettings,
             in HDShadowInitParameters shadowInitParams,
             DebugDisplaySettings debugDisplaySettings)
@@ -471,7 +471,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 LightVolumeType lightVolumeType = (LightVolumeType)((sortKey >> 17) & 0x1F);
                 int lightIndex = (int)(sortKey & 0xFFFF);
 
-                HDLightEntityData entityData = visibleLights.visibleEntities[lightIndex];
+                HDLightRenderEntityData entityData = visibleLights.visibleEntities[lightIndex];
                 HDAdditionalLightData additionalLightData = lightEntities.hdAdditionalLightData[entityData.dataIndex];
 
                 //We utilize a ray light data pointer to avoid copying the entire structure
@@ -531,7 +531,7 @@ namespace UnityEngine.Rendering.HighDefinition
             HDCamera hdCamera,
             in CullingResults cullingResult,
             HDVisibleLightEntities visibleLights,
-            HDLightEntityCollection lightEntities,
+            HDLightRenderDatabase lightEntities,
             in HDShadowInitParameters shadowInitParams,
             DebugDisplaySettings debugDisplaySettings)
         {

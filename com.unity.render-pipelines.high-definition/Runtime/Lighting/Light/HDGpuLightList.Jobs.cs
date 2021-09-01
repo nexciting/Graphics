@@ -809,7 +809,7 @@ namespace UnityEngine.Rendering.HighDefinition
             in CullingResults cullingResult,
             HDShadowSettings hdShadowSettings,
             HDVisibleLightEntities visibleLights,
-            HDLightEntityCollection lightEntities)
+            HDLightRenderDatabase lightEntities)
         {
             var visualEnvironment = hdCamera.volumeStack.GetComponent<VisualEnvironment>();
             var skySettings = hdCamera.volumeStack.GetComponent<PhysicallyBasedSky>();
