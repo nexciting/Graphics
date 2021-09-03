@@ -6,7 +6,7 @@
     "unityRelease": "14f1",
     "displayName": "Universal RP",
     "dependencies": {
-        "com.unity.render-pipelines.core": "8.3.1",
+        "com.unity.render-pipelines.core": "8.3.2",
         "com.unity.shadergraph": "8.3.1"
     },
 	"keywords":[
