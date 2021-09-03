@@ -327,7 +327,9 @@ namespace UnityEngine.Rendering
                     && !IsVolumeRenderedByCamera(volume, camera))
                     continue;
 #endif
-
+                // Skip missing reference volumes
+                if (volume == null)
+                    continue;
                 // Skip disabled volumes and volumes without any data or weight
                 if (!volume.enabled || volume.profileRef == null || volume.weight <= 0f)
                     continue;
